@@ -1,26 +1,56 @@
-import { Engine, EventPlayer, FlightObject, Logger } from "../app";
+import { engine, missionManager } from "../app";
 import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-const logger = new Logger();
-const engine = new Engine(logger);
-
-engine.createFlightObject('test', [
-  { x: 0, y: 0, z: 10, v: 10 },
-  { x: 10, y: 10, z: 10, v: 10 },
-  { x: 20, y: 20, z: 10, v: 10 },
-  { x: 15, y: 30, z: 10, v: 10 },
-]);
 engine.start();
+const missionData = {
+  map: {
+    size: 1000,
+    data: [/* данные высот */]
+  },
+  targets: [
+    {
+      id: 'target1',
+      position: { x: 0, y: 0, z: 0 },
+      speed: 10,
+      rcs: 1,
+      temperature: 50,
+      size: 2,
+      waypoints: [
+        { position: { x: 0, y: 0, z: 0 }, speed: 10 },
+        { position: { x: 10, y: 0, z: 0 }, speed: 10 },
+        { position: { x: 10, y: 10, z: 0 }, speed: 10 }
+      ]
+    }
+  ],
+  radars: [
+    {
+      id: 'radar1',
+      type: 'search',
+      position: { x: 5, y: 5, z: 0 },
+      minElevationAngle: -Math.PI / 6,
+      maxElevationAngle: Math.PI / 6
+    }
+  ],
+  cameras: [
+    {
+      id: 'camera1',
+      type: 'tv',
+      position: { x: 2, y: 2, z: 1 },
+      minElevationAngle: -Math.PI / 6,
+      maxElevationAngle: Math.PI / 6,
+      azimuthAngle: Math.PI / 4,
+      viewAngle: Math.PI / 3
+    }
+  ]
+};
 
-/*
-setTimeout(() => {
-  flightObject1.kill();
-}, 3000); // Убиваем объект через 3 секунд для демонстрации
-*/
+missionManager.createEntities(missionData);
 
 // СЦЕНА
-engine.addEventListener("update", updateScene);
+engine.addEventListener("update", () => {
+  console.log('upd')
+});
 const scene = new THREE.Scene();
 const objects = new Map<string, THREE.Mesh>();
 
@@ -60,6 +90,7 @@ function initScene() {
   animate();
 }
 
+/*
 function updateScene(flightObjects: FlightObject[]) {
   flightObjects.forEach((obj) => {
     if (!objects.has(obj.id)) {
@@ -90,7 +121,6 @@ function updateScene(flightObjects: FlightObject[]) {
   // Удаляем объекты, которые были удалены из движка
   objects.forEach((_, id) => {
     if (!flightObjects.find((obj) => obj.id === id)) {
-     
       const mesh = objects.get(id);
       if (mesh) {
         scene.remove(mesh);
@@ -99,14 +129,4 @@ function updateScene(flightObjects: FlightObject[]) {
     }
   });
 }
-
-
-setTimeout(() => {
-  engine.killFlightObject('test')
-}, 3000)
-
-setTimeout(() => {
-  engine.stop();
-// Воспроизведение лога событий
-console.log(logger.getLog())
-}, 5000)
+*/
