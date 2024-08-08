@@ -32,6 +32,7 @@ class Engine {
 
   update(deltaTime: number) {
     this.world.step(deltaTime * this.timeScale);
+    this.entities = this.entities.filter(e => !e.isDestroyed)
     for (const entity of this.entities) {
       entity.update(deltaTime * this.timeScale);
     }

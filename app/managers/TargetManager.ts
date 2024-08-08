@@ -31,13 +31,14 @@ class TargetManager {
     const nextWaypoint = () => {
       currentIndex++;
       if (currentIndex < waypoints.length) {
-        console.log('here')
         this.moveToWaypoint(
           target,
           waypoints[currentIndex - 1],
           waypoints[currentIndex],
           nextWaypoint,
         );
+      } else {
+        target.destroy()
       }
     };
 
@@ -52,22 +53,26 @@ class TargetManager {
     );
     const distance = direction.norm();
     direction.normalize(); // Нормализуем направление после вычисления дистанции
-    const duration = distance / from.speed;
+    const duration = distance / to.speed;
     let elapsed = 0;
 
-    const updateTarget = (deltaTime: number) => {
+    const updateVelocity = (deltaTime: number) => {
+      if (target.isKilled) {
+        target.velocity.set(0, 0, 0); // Останавливаем движение при убийстве цели
+        return;
+      }
+
       elapsed += deltaTime;
       if (elapsed >= duration) {
-        target.body.position.set(to.position.x, to.position.y, to.position.z);
+        target.velocity.set(0, 0, 0); // Останавливаем движение после достижения точки
         if (callback) callback();
       } else {
-       
-        const moveStep = direction.scale(from.speed * deltaTime);
-        target.body.position.vadd(moveStep, target.body.position);
+        const moveStep = direction.scale(to.speed * deltaTime);
+        target.velocity.copy(moveStep);
       }
     };
 
-    target.update = updateTarget;
+    target.updateCallback = updateVelocity;
   }
 }
 
