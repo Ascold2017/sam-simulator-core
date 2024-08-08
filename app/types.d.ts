@@ -6,7 +6,7 @@ export interface Position {
 
 export interface MapData {
     size: number;
-    data: number[];
+    data: number[][];
 }
 
 export interface TargetData {

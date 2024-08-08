@@ -1,4 +1,4 @@
-import * as CANNON from "cannon";
+import * as CANNON from "cannon-es";
 import Engine from "../core/Engine";
 import TargetObject from "../flightObjects/TargetObject";
 import { RouteData, Waypoint } from "../types";
@@ -30,7 +30,6 @@ class TargetManager {
     const nextWaypoint = () => {
       currentIndex++;
       if (currentIndex < waypoints.length) {
-        console.log(currentIndex)
         this.moveToWaypoint(
           target,
           waypoints[currentIndex - 1],
@@ -51,7 +50,7 @@ class TargetManager {
       to.position.y - from.position.y,
       to.position.z - from.position.z
     );
-    const distance = direction.norm();
+    const distance = direction.length();
     const duration = distance / to.speed;
     let elapsed = 0;
 

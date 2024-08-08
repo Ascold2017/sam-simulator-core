@@ -11,13 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^22.1.0",
-    "cannon": "^0.6.2",
+    "cannon-es": "^0.20.0",
     "three": "^0.167.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
   "devDependencies": {
-    "@types/cannon": "^0.1.13",
     "@types/three": "^0.167.1",
     "vite": "^5.3.5"
   }

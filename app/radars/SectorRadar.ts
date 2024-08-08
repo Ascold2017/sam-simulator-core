@@ -1,5 +1,6 @@
 import Radar from '../core/Radar';
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
+
 
 class SectorRadar extends Radar {
   azimuthAngle: number;

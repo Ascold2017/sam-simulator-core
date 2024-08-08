@@ -1,4 +1,4 @@
-import * as CANNON from "cannon";
+import * as CANNON from "cannon-es";
 import ThermalCamera from "../cameras/ThermalCamera";
 import TvCamera from "../cameras/TvCamera";
 import Engine from "../core/Engine";

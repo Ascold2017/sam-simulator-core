@@ -1,4 +1,4 @@
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
 import Entity from './Entity';
 import FlightObject from './FlightObject';
 import Radar from './Radar';
@@ -45,7 +45,7 @@ class Engine {
     const index = this.entities.indexOf(entity);
     if (index > -1) {
       this.entities.splice(index, 1);
-      this.world.remove(entity.body);
+      this.world.removeBody(entity.body);
     }
   }
 

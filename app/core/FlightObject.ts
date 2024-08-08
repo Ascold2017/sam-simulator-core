@@ -1,5 +1,6 @@
 import Entity from './Entity';
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
+
 
 class FlightObject extends Entity {
   velocity: CANNON.Vec3;
@@ -17,7 +18,7 @@ class FlightObject extends Entity {
     this.body.position.vadd(this.velocity.scale(deltaTime), this.body.position);
     if (!this.isKilled) {
       // Компенсация гравитации
-      const gravityCompensation = new CANNON.Vec3(0, 0, -this.body.mass * this.body.world.gravity.z);
+      const gravityCompensation = new CANNON.Vec3(0, 0, -this.body.mass * this.body.world!.gravity.z);
       this.body.applyForce(gravityCompensation, this.body.position);
     }
     

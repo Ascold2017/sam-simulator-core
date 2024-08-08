@@ -1,5 +1,5 @@
 import Entity from './Entity';
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
 
 class Camera extends Entity {
   minElevationAngle: number;

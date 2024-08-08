@@ -1,5 +1,5 @@
 import FlightObject from '../core/FlightObject';
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
 import TargetObject from './TargetObject';
 
 class ActiveMissile extends FlightObject {

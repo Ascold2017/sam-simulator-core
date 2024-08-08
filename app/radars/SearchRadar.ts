@@ -1,5 +1,5 @@
 import Radar from '../core/Radar';
-import * as CANNON from 'cannon';
+import * as CANNON from "cannon-es";
 
 class SearchRadar extends Radar {
   constructor(id: string, body: CANNON.Body, minElevationAngle: number, maxElevationAngle: number) {
