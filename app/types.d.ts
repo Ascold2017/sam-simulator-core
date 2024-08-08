@@ -12,7 +12,6 @@ export interface MapData {
 export interface TargetData {
     id: string;
     position: Position;
-    speed: number;
     rcs: number;
     temperature: number;
     size: number;

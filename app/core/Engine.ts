@@ -1,13 +1,16 @@
 import * as CANNON from 'cannon';
 import Entity from './Entity';
+import FlightObject from './FlightObject';
+import Radar from './Radar';
+import Camera from './Camera';
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
 
 class Engine {
-  world: CANNON.World;
-  entities: Entity[] = [];
-  eventListeners: { [key: string]: Function[] } = {};
+  private world: CANNON.World;
+  private entities: Entity[] = [];
+  private eventListeners: { [key: string]: Function[] } = {};
   private lastUpdateTime: number = Date.now();
   private isRunning: boolean = false;
   private timeScale: number = 1; // Начальное значение timeScale
@@ -15,6 +18,22 @@ class Engine {
   constructor() {
     this.world = new CANNON.World();
     this.world.gravity.set(0, 0, -9.82);
+  }
+
+  getEntities() {
+    return this.entities;
+  }
+
+  getFlightObjects() {
+    return this.entities.filter(e => e instanceof FlightObject)
+  }
+
+  getRadars() {
+    return this.entities.filter(e => e instanceof Radar)
+  }
+
+  getCameras() {
+    return this.entities.filter(e => e instanceof Camera)
   }
 
   addEntity(entity: Entity) {

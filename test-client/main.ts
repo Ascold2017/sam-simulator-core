@@ -13,15 +13,14 @@ const missionData: MissionData = {
   targets: [
     {
       id: 'target1',
-      position: { x: 0, y: 0, z: 100 },
-      speed: 10,
+      position: { x: 0, y: 0, z: 10 },
       rcs: 1,
       temperature: 50,
       size: 2,
       waypoints: [
-        { position: { x: 0, y: 0, z: 100 }, speed: 200 },
-        { position: { x: 10, y: 1200, z: 120 }, speed: 170 },
-        { position: { x: 1800, y: 1300, z: 110 }, speed: 150 }
+        { position: { x: 0, y: 0, z: 10 }, speed: 2 },
+        { position: { x: 5, y: 5, z: 11 }, speed: 1.7 },
+        { position: { x: 10, y: 10, z: 9 }, speed: 1.5 }
       ]
     }
   ],
@@ -53,22 +52,22 @@ core.missionManager.createEntities(missionData);
 // СЦЕНА
 
 core.engine.addEventListener("update", () => {
-  updateScene(core.engine.entities)
+  updateScene(core.engine.getFlightObjects())
 });
 
 const scene = new THREE.Scene();
-const objects = new Map<string, THREE.Mesh>();
+const objects = new Map<string, { sphere: THREE.Mesh, text: THREE.Sprite }>();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  5000,
+);
 
 initScene();
-updateScene(core.engine.entities)
 
 function initScene() {
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    5000,
-  );
+  
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -97,6 +96,34 @@ function initScene() {
 }
 
 
+function createTextSprite(message: string, parameters: any = {}) {
+  const fontface = parameters.fontface || 'Arial';
+  const fontsize = parameters.fontsize || 18;
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+  context.font = `${fontsize}px ${fontface}`;
+
+  // Размер текста
+  const metrics = context.measureText(message);
+  const textWidth = metrics.width;
+
+  // Размер канваса
+  canvas.width = textWidth;
+  canvas.height = fontsize;
+
+  // Настройки текста
+  context.font = `${fontsize}px ${fontface}`;
+  context.fillStyle = parameters.fillStyle || 'rgba(255, 0, 0, 1.0)';
+  context.fillText(message, 0, fontsize);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.scale.set(textWidth / 10, fontsize / 10, 1);
+
+  return sprite;
+}
+
 function updateScene(entities: Entity[]) {
   entities.forEach((obj) => {
     if (!objects.has(obj.id)) {
@@ -106,29 +133,50 @@ function updateScene(entities: Entity[]) {
         wireframe: true,
       });
       const sphere = new THREE.Mesh(geometry, material);
+
+      const text = createTextSprite(`${obj.body.position.x.toFixed(2)}|${obj.body.position.y.toFixed(2)}|${obj.body.position.z.toFixed(2)}`);
+
       scene.add(sphere);
-      objects.set(obj.id, sphere);
+      scene.add(text);
+      objects.set(obj.id, { sphere, text });
     }
 
-    const sphere = objects.get(obj.id);
-    if (sphere) {
+    const objectData = objects.get(obj.id);
+    if (objectData) {
+      const { sphere, text } = objectData;
       sphere.position.set(
         obj.body.position.x,
         obj.body.position.y,
         obj.body.position.z,
       );
+
+      // Обновляем текст и его позицию
+      text.position.set(
+        obj.body.position.x,
+        obj.body.position.y,
+        obj.body.position.z + 1.5, // Смещаем текст выше сферы
+      );
+
+      // Обновляем текстовое сообщение
+      const newMessage = `${obj.body.position.x.toFixed(2)}|${obj.body.position.y.toFixed(2)}| ${obj.body.position.z.toFixed(2)}`;
+      const newText = createTextSprite(newMessage);
+      text.material.map = newText.material.map;
+
+      // Направляем текст в камеру
+      text.lookAt(camera.position);
     }
   });
 
   // Удаляем объекты, которые были удалены из движка
   objects.forEach((_, id) => {
     if (!entities.find((obj) => obj.id === id)) {
-      const mesh = objects.get(id);
-      if (mesh) {
-        scene.remove(mesh);
+      const objectData = objects.get(id);
+      if (objectData) {
+        const { sphere, text } = objectData;
+        scene.remove(sphere);
+        scene.remove(text);
       }
       objects.delete(id);
     }
   });
 }
-

@@ -22,6 +22,10 @@ class FlightObject extends Entity {
     }
     
   }
+
+  kill() {
+    this.isKilled = true;
+  }
 }
 
 export default FlightObject;

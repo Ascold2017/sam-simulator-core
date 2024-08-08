@@ -18,10 +18,9 @@ class TargetManager {
   }
 
   private getTargetById(id: string): TargetObject | undefined {
-    return this.engine.entities.find(
-      (entity) =>
-        entity instanceof TargetObject && (entity as TargetObject).id === id,
-    ) as TargetObject | undefined;
+    return this.engine.getFlightObjects().find(
+      (entity) =>(entity).id === id,
+    ) as TargetObject;
   }
 
   private moveAlongRoute(target: TargetObject, waypoints: Waypoint[]) {
@@ -31,6 +30,7 @@ class TargetManager {
     const nextWaypoint = () => {
       currentIndex++;
       if (currentIndex < waypoints.length) {
+        console.log(currentIndex)
         this.moveToWaypoint(
           target,
           waypoints[currentIndex - 1],
@@ -52,17 +52,16 @@ class TargetManager {
       to.position.z - from.position.z
     );
     const distance = direction.norm();
-    direction.normalize(); // Нормализуем направление после вычисления дистанции
     const duration = distance / to.speed;
     let elapsed = 0;
 
-    const updateVelocity = (deltaTime: number) => {
+    const updateCallback = (deltaTime: number) => {
+      elapsed += deltaTime;
       if (target.isKilled) {
         target.velocity.set(0, 0, 0); // Останавливаем движение при убийстве цели
         return;
       }
 
-      elapsed += deltaTime;
       if (elapsed >= duration) {
         target.velocity.set(0, 0, 0); // Останавливаем движение после достижения точки
         if (callback) callback();
@@ -72,7 +71,7 @@ class TargetManager {
       }
     };
 
-    target.updateCallback = updateVelocity;
+    target.updateCallback = updateCallback;
   }
 }
 

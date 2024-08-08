@@ -49,7 +49,7 @@ class MissionManager {
       const target = new TargetObject(
         targetData.id,
         targetBody,
-        new CANNON.Vec3(targetData.speed, 0, 0),
+        new CANNON.Vec3(0, 0, 0),
       );
       this.engine.addEntity(target);
       // Устанавливаем маршруты для целей
