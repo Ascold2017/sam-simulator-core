@@ -23,6 +23,8 @@ class ActiveMissile extends FlightObject {
   setTarget(target: TargetObject) {
     this.target = target;
   }
+
+  
 }
 
 export default ActiveMissile;

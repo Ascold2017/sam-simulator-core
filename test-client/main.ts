@@ -1,25 +1,27 @@
-import { engine, missionManager } from "../app";
+import { Core, type MissionData } from "../app";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Entity from "../app/core/Entity";
 
-engine.start();
-const missionData = {
+const core = new Core()
+core.engine.start();
+const missionData: MissionData = {
   map: {
-    size: 1000,
-    data: [/* данные высот */]
+    size: 1,
+    data: [70, 100, 87, 36, 35, 34, 56, 59]
   },
   targets: [
     {
       id: 'target1',
-      position: { x: 0, y: 0, z: 0 },
+      position: { x: 0, y: 0, z: 100 },
       speed: 10,
       rcs: 1,
       temperature: 50,
       size: 2,
       waypoints: [
-        { position: { x: 0, y: 0, z: 0 }, speed: 10 },
-        { position: { x: 10, y: 0, z: 0 }, speed: 10 },
-        { position: { x: 10, y: 10, z: 0 }, speed: 10 }
+        { position: { x: 0, y: 0, z: 100 }, speed: 10 },
+        { position: { x: 10, y: 1200, z: 120 }, speed: 10 },
+        { position: { x: 1800, y: 1300, z: 110 }, speed: 10 }
       ]
     }
   ],
@@ -27,7 +29,7 @@ const missionData = {
     {
       id: 'radar1',
       type: 'search',
-      position: { x: 5, y: 5, z: 0 },
+      position: { x: 5, y: 10, z: 5 },
       minElevationAngle: -Math.PI / 6,
       maxElevationAngle: Math.PI / 6
     }
@@ -36,7 +38,7 @@ const missionData = {
     {
       id: 'camera1',
       type: 'tv',
-      position: { x: 2, y: 2, z: 1 },
+      position: { x: 2, y: 7, z: 1 },
       minElevationAngle: -Math.PI / 6,
       maxElevationAngle: Math.PI / 6,
       azimuthAngle: Math.PI / 4,
@@ -45,23 +47,27 @@ const missionData = {
   ]
 };
 
-missionManager.createEntities(missionData);
+core.missionManager.createEntities(missionData);
+
 
 // СЦЕНА
-engine.addEventListener("update", () => {
-  console.log('upd')
+
+core.engine.addEventListener("update", () => {
+  updateScene(core.engine.entities)
 });
+
 const scene = new THREE.Scene();
 const objects = new Map<string, THREE.Mesh>();
 
 initScene();
+updateScene(core.engine.entities)
 
 function initScene() {
   const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000,
+    5000,
   );
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -90,9 +96,9 @@ function initScene() {
   animate();
 }
 
-/*
-function updateScene(flightObjects: FlightObject[]) {
-  flightObjects.forEach((obj) => {
+
+function updateScene(entities: Entity[]) {
+  entities.forEach((obj) => {
     if (!objects.has(obj.id)) {
       const geometry = new THREE.SphereGeometry(1, 32, 32);
       const material = new THREE.MeshBasicMaterial({
@@ -111,16 +117,12 @@ function updateScene(flightObjects: FlightObject[]) {
         obj.body.position.y,
         obj.body.position.z,
       );
-      // Перекрашиваем объект в красный, если он убит
-      if (obj.isKilled) {
-        (sphere.material as THREE.MeshBasicMaterial).color.set(0xff0000);
-      }
     }
   });
 
   // Удаляем объекты, которые были удалены из движка
   objects.forEach((_, id) => {
-    if (!flightObjects.find((obj) => obj.id === id)) {
+    if (!entities.find((obj) => obj.id === id)) {
       const mesh = objects.get(id);
       if (mesh) {
         scene.remove(mesh);
@@ -129,4 +131,4 @@ function updateScene(flightObjects: FlightObject[]) {
     }
   });
 }
-*/
+

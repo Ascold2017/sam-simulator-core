@@ -7,7 +7,8 @@ class HeightmapTerrain extends Entity {
     const shape = new CANNON.Heightfield(data, {
       elementSize
     });
-    const body = new CANNON.Body({ mass: 0 });
+    
+    const body = new CANNON.Body();
     body.addShape(shape);
     super('heightmap', body);
   }

@@ -1,13 +1,19 @@
-import * as CANNON from 'cannon';
-import ThermalCamera from '../cameras/ThermalCamera';
-import TvCamera from '../cameras/TvCamera';
-import Engine from '../core/Engine';
-import HeightmapTerrain from '../core/HeightmapTerrain';
-import TargetObject from '../flightObjects/TargetObject';
-import SearchRadar from '../radars/SearchRadar';
-import SectorRadar from '../radars/SectorRadar';
-import { MissionData, MapData, TargetData, RadarData, CameraData } from '../types';
-import TargetManager from './TargetManager';
+import * as CANNON from "cannon";
+import ThermalCamera from "../cameras/ThermalCamera";
+import TvCamera from "../cameras/TvCamera";
+import Engine from "../core/Engine";
+import HeightmapTerrain from "../core/HeightmapTerrain";
+import TargetObject from "../flightObjects/TargetObject";
+import SearchRadar from "../radars/SearchRadar";
+import SectorRadar from "../radars/SectorRadar";
+import {
+  CameraData,
+  MapData,
+  MissionData,
+  RadarData,
+  TargetData,
+} from "../types";
+import TargetManager from "./TargetManager";
 
 class MissionManager {
   engine: Engine;
@@ -19,7 +25,7 @@ class MissionManager {
   }
 
   createEntities(missionData: MissionData) {
-    this.initTerrain(missionData.map);
+    //this.initTerrain(missionData.map);
     this.initTargets(missionData.targets);
     this.initRadars(missionData.radars);
     this.initCameras(missionData.cameras);
@@ -32,27 +38,55 @@ class MissionManager {
 
   private initTargets(targets: TargetData[]) {
     for (const targetData of targets) {
-      const targetBody = new CANNON.Body({ mass: 1, position: new CANNON.Vec3(targetData.position.x, targetData.position.y, targetData.position.z) });
-      const target = new TargetObject(targetData.id, targetBody, new CANNON.Vec3(targetData.speed, 0, 0));
+      const targetBody = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(
+          targetData.position.x,
+          targetData.position.y,
+          targetData.position.z,
+        ),
+      });
+      const target = new TargetObject(
+        targetData.id,
+        targetBody,
+        new CANNON.Vec3(targetData.speed, 0, 0),
+      );
       this.engine.addEntity(target);
-
       // Устанавливаем маршруты для целей
-    const routes = targets.map(targetData => ({
-      targetId: targetData.id,
-      waypoints: targetData.waypoints
-    }));
-    this.targetManager.updateRoutes(routes);
+      this.targetManager.updateRoute({
+        targetId: targetData.id,
+        waypoints: targetData.waypoints,
+      });
     }
   }
 
   private initRadars(radars: RadarData[]) {
     for (const radarData of radars) {
-      const radarBody = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(radarData.position.x, radarData.position.y, radarData.position.z) });
+      const radarBody = new CANNON.Body({
+        mass: 0,
+        position: new CANNON.Vec3(
+          radarData.position.x,
+          radarData.position.y,
+          radarData.position.z,
+        ),
+      });
       let radar;
-      if (radarData.type === 'search') {
-        radar = new SearchRadar(radarData.id, radarBody, radarData.minElevationAngle, radarData.maxElevationAngle);
-      } else if (radarData.type === 'sector') {
-        radar = new SectorRadar(radarData.id, radarBody, radarData.minElevationAngle, radarData.maxElevationAngle, radarData.azimuthAngle!, radarData.viewAngle!);
+      if (radarData.type === "search") {
+        radar = new SearchRadar(
+          radarData.id,
+          radarBody,
+          radarData.minElevationAngle,
+          radarData.maxElevationAngle,
+        );
+      } else if (radarData.type === "sector") {
+        radar = new SectorRadar(
+          radarData.id,
+          radarBody,
+          radarData.minElevationAngle,
+          radarData.maxElevationAngle,
+          radarData.azimuthAngle!,
+          radarData.viewAngle!,
+        );
       }
       this.engine.addEntity(radar!);
     }
@@ -60,12 +94,33 @@ class MissionManager {
 
   private initCameras(cameras: CameraData[]) {
     for (const cameraData of cameras) {
-      const cameraBody = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(cameraData.position.x, cameraData.position.y, cameraData.position.z) });
+      const cameraBody = new CANNON.Body({
+        mass: 0,
+        position: new CANNON.Vec3(
+          cameraData.position.x,
+          cameraData.position.y,
+          cameraData.position.z,
+        ),
+      });
       let camera;
-      if (cameraData.type === 'tv') {
-        camera = new TvCamera(cameraData.id, cameraBody, cameraData.minElevationAngle, cameraData.maxElevationAngle, cameraData.azimuthAngle, cameraData.viewAngle);
-      } else if (cameraData.type === 'thermal') {
-        camera = new ThermalCamera(cameraData.id, cameraBody, cameraData.minElevationAngle, cameraData.maxElevationAngle, cameraData.azimuthAngle, cameraData.viewAngle);
+      if (cameraData.type === "tv") {
+        camera = new TvCamera(
+          cameraData.id,
+          cameraBody,
+          cameraData.minElevationAngle,
+          cameraData.maxElevationAngle,
+          cameraData.azimuthAngle,
+          cameraData.viewAngle,
+        );
+      } else if (cameraData.type === "thermal") {
+        camera = new ThermalCamera(
+          cameraData.id,
+          cameraBody,
+          cameraData.minElevationAngle,
+          cameraData.maxElevationAngle,
+          cameraData.azimuthAngle,
+          cameraData.viewAngle,
+        );
       }
       this.engine.addEntity(camera!);
     }

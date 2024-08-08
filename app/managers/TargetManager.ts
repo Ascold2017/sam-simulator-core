@@ -1,3 +1,4 @@
+import * as CANNON from "cannon";
 import Engine from "../core/Engine";
 import TargetObject from "../flightObjects/TargetObject";
 import { RouteData, Waypoint } from "../types";
@@ -9,13 +10,11 @@ class TargetManager {
     this.engine = engine;
   }
 
-  updateRoutes(routes: RouteData[]) {
-    routes.forEach((route) => {
-      const target = this.getTargetById(route.targetId);
-      if (target) {
-        this.moveAlongRoute(target, route.waypoints);
-      }
-    });
+  updateRoute(route: RouteData) {
+    const target = this.getTargetById(route.targetId);
+    if (target) {
+      this.moveAlongRoute(target, route.waypoints);
+    }
   }
 
   private getTargetById(id: string): TargetObject | undefined {
@@ -32,6 +31,7 @@ class TargetManager {
     const nextWaypoint = () => {
       currentIndex++;
       if (currentIndex < waypoints.length) {
+        console.log('here')
         this.moveToWaypoint(
           target,
           waypoints[currentIndex - 1],
@@ -44,18 +44,14 @@ class TargetManager {
     this.moveToWaypoint(target, waypoints[0], waypoints[1], nextWaypoint);
   }
 
-  private moveToWaypoint(
-    target: TargetObject,
-    from: Waypoint,
-    to: Waypoint,
-    callback?: Function,
-  ) {
+  private moveToWaypoint(target: TargetObject, from: Waypoint, to: Waypoint, callback?: Function) {
     const direction = new CANNON.Vec3(
       to.position.x - from.position.x,
       to.position.y - from.position.y,
-      to.position.z - from.position.z,
+      to.position.z - from.position.z
     );
     const distance = direction.norm();
+    direction.normalize(); // Нормализуем направление после вычисления дистанции
     const duration = distance / from.speed;
     let elapsed = 0;
 
@@ -65,6 +61,7 @@ class TargetManager {
         target.body.position.set(to.position.x, to.position.y, to.position.z);
         if (callback) callback();
       } else {
+       
         const moveStep = direction.scale(from.speed * deltaTime);
         target.body.position.vadd(moveStep, target.body.position);
       }

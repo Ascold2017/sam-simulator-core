@@ -7,6 +7,9 @@ class TargetObject extends FlightObject {
   }
 
   // Additional logic for target movement can be added here
+  update(deltaTime: number): void {
+    super.update(deltaTime)
+  }
 }
 
 export default TargetObject;
