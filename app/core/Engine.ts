@@ -17,7 +17,7 @@ class Engine {
 
   constructor() {
     this.world = new CANNON.World();
-    this.world.gravity.set(0, 0, -9.82);
+    // this.world.gravity.set(0, 0, -9.82);
   }
 
   getEntities() {
@@ -79,7 +79,7 @@ class Engine {
     const now = Date.now();
     const deltaTime = (now - this.lastUpdateTime) / 1000;
     if (deltaTime >= UPDATE_FREQUENCY) {
-      this.update(UPDATE_FREQUENCY);
+      this.update(deltaTime);
       this.lastUpdateTime = now;
     }
 

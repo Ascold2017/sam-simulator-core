@@ -13,14 +13,13 @@ const missionData: MissionData = {
   targets: [
     {
       id: 'target1',
-      position: { x: 0, y: 0, z: 10 },
       rcs: 1,
       temperature: 50,
       size: 2,
       waypoints: [
-        { position: { x: 0, y: 0, z: 10 }, speed: 2 },
-        { position: { x: 5, y: 5, z: 11 }, speed: 1.7 },
-        { position: { x: 10, y: 10, z: 9 }, speed: 1.5 }
+        { position: { x: 0, y: 0, z: 10 }, speed: 20 },
+        { position: { x: 50, y: 50, z: 16 }, speed: 17 },
+        { position: { x: -20, y: -20, z: 9 }, speed: 15 }
       ]
     }
   ],

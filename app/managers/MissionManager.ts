@@ -41,9 +41,9 @@ class MissionManager {
       const targetBody = new CANNON.Body({
         mass: 1,
         position: new CANNON.Vec3(
-          targetData.position.x,
-          targetData.position.y,
-          targetData.position.z,
+          targetData.waypoints[0].position.x,
+          targetData.waypoints[0].position.y,
+          targetData.waypoints[0].position.z,
         ),
       });
       const target = new TargetObject(
@@ -55,7 +55,7 @@ class MissionManager {
       // Устанавливаем маршруты для целей
       this.targetManager.updateRoute({
         targetId: targetData.id,
-        waypoints: targetData.waypoints,
+        waypoints: targetData.waypoints.slice(1),
       });
     }
   }

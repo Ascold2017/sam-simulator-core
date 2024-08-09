@@ -19,12 +19,12 @@ class TargetManager {
 
   private getTargetById(id: string): TargetObject | undefined {
     return this.engine.getFlightObjects().find(
-      (entity) =>(entity).id === id,
+      (entity) => entity.id === id,
     ) as TargetObject;
   }
 
   private moveAlongRoute(target: TargetObject, waypoints: Waypoint[]) {
-    if (waypoints.length < 2) return;
+    if (waypoints.length < 1) return;
 
     let currentIndex = 0;
     const nextWaypoint = () => {
@@ -32,41 +32,38 @@ class TargetManager {
       if (currentIndex < waypoints.length) {
         this.moveToWaypoint(
           target,
-          waypoints[currentIndex - 1],
           waypoints[currentIndex],
           nextWaypoint,
         );
       } else {
-        target.destroy()
+        target.destroy();
       }
     };
 
-    this.moveToWaypoint(target, waypoints[0], waypoints[1], nextWaypoint);
+    this.moveToWaypoint(target, waypoints[0], nextWaypoint);
   }
 
-  private moveToWaypoint(target: TargetObject, from: Waypoint, to: Waypoint, callback?: Function) {
-    const direction = new CANNON.Vec3(
-      to.position.x - from.position.x,
-      to.position.y - from.position.y,
-      to.position.z - from.position.z
+  private moveToWaypoint(
+    target: TargetObject,
+    destination: Waypoint,
+    callback?: Function,
+  ) {
+    const destPosition = new CANNON.Vec3(
+      destination.position.x,
+      destination.position.y,
+      destination.position.z,
     );
-    const distance = direction.length();
-    const duration = distance / to.speed;
-    let elapsed = 0;
 
     const updateCallback = (deltaTime: number) => {
-      elapsed += deltaTime;
-      if (target.isKilled) {
-        target.velocity.set(0, 0, 0); // Останавливаем движение при убийстве цели
-        return;
-      }
-
-      if (elapsed >= duration) {
-        target.velocity.set(0, 0, 0); // Останавливаем движение после достижения точки
+      // calculate direction to destination point
+      const direction = destPosition.vsub(target.body.position);
+      direction.normalize();
+      if (target.body.position.distanceTo(destPosition) < 1) {
+        // if we destinated position - call next waypoint
         if (callback) callback();
       } else {
-        const moveStep = direction.scale(to.speed * deltaTime);
-        target.velocity.copy(moveStep);
+        // set velocity
+        target.body.velocity = direction.scale(destination.speed);
       }
     };
 
