@@ -17,8 +17,8 @@ class FlightObject extends Entity {
     
     this.body.position.vadd(this.velocity.scale(deltaTime), this.body.position);
     if (this.isKilled) {
-      // Компенсация гравитации
-      const gravityCompensation = new CANNON.Vec3(0, 0, this.body.mass * 9.81);
+      // Применяем гравитацию
+      const gravityCompensation = new CANNON.Vec3(0, 0, -this.body.mass * 9.81);
       this.body.applyForce(gravityCompensation, this.body.position);
     }
     

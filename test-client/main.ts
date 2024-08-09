@@ -47,7 +47,8 @@ const missionData: MissionData = {
 
 core.missionManager.createEntities(missionData);
 
-
+setTimeout(() =>
+core.targetManager.killTarget('target1'), 3000)
 // СЦЕНА
 
 core.engine.addEventListener("update", () => {

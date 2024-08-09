@@ -17,6 +17,13 @@ class TargetManager {
     }
   }
 
+  killTarget(targetId: string) {
+    const target = this.getTargetById(targetId);
+    if (target) {
+      target.kill()
+    }
+  }
+
   private getTargetById(id: string): TargetObject | undefined {
     return this.engine.getFlightObjects().find(
       (entity) => entity.id === id,

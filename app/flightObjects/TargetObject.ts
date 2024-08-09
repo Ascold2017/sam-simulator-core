@@ -12,7 +12,7 @@ class TargetObject extends FlightObject {
   // Additional logic for target movement can be added here
   update(deltaTime: number): void {
     super.update(deltaTime)
-    this.updateCallback(deltaTime)
+    if (!this.isKilled) this.updateCallback(deltaTime)
   }
 }
 
