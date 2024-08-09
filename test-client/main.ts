@@ -30,7 +30,9 @@ const missionData: MissionData = {
       type: "search",
       position: { x: 5, y: 10, z: 5 },
       minElevationAngle: 0,
-      maxElevationAngle: Math.PI / 6,
+      maxElevationAngle: Math.PI / 4,
+      maxDistance: 10000,
+      sweepSpeed: 1
     },
   ],
   cameras: [

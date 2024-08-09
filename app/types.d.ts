@@ -23,6 +23,8 @@ export interface RadarData {
     position: Position;
     minElevationAngle: number;
     maxElevationAngle: number;
+    maxDistance: number;
+    sweepSpeed?: number;
     azimuthAngle?: number;
     viewAngle?: number;
 }
