@@ -25,7 +25,7 @@ class MissionManager {
   }
 
   createEntities(missionData: MissionData) {
-    //this.initTerrain(missionData.map);
+    this.initTerrain(missionData.map);
     this.initTargets(missionData.targets);
     this.initRadars(missionData.radars);
     this.initCameras(missionData.cameras);
@@ -33,6 +33,7 @@ class MissionManager {
 
   private initTerrain(mapData: MapData) {
     const terrain = new HeightmapTerrain(mapData.data, mapData.size);
+    console.log(terrain)
     this.engine.addEntity(terrain);
   }
 

@@ -3,13 +3,23 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Entity from "../app/core/Entity";
 import SearchRadar from "../app/radars/SearchRadar";
+import HeightmapTerrain from "../app/core/HeightmapTerrain";
+import FlightObject from "../app/core/FlightObject";
+import Radar from "../app/core/Radar";
+import Camera from "../app/core/Camera";
 
 const core = new Core();
 core.engine.start();
 const missionData: MissionData = {
   map: {
-    size: 1,
-    data: [70, 100, 87, 36, 35, 34, 56, 59],
+    size: 100,
+    data: [
+      [0, 1, 2, 3, 4],
+      [1, 2, 3, 4, 3],
+      [2, 3, 5, 3, 2],
+      [1, 2, 3, 2, 1],
+      [0, 1, 2, 1, 0],
+    ],
   },
   targets: [
     {
@@ -51,7 +61,6 @@ const missionData: MissionData = {
 core.missionManager.createEntities(missionData);
 core.radarManager.subscribeToRadarUpdates("radar1", (radar) => {
   const searcRadar = radar as SearchRadar;
-  console.log(searcRadar.getState());
 });
 core.radarManager.toggleRadarById("radar1", true);
 
@@ -89,6 +98,17 @@ function initScene() {
   // Добавление осей
   const axesHelper = new THREE.AxesHelper(5);
   scene.add(axesHelper);
+
+  const light = new THREE.AmbientLight()
+  scene.add(light)
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Направленный свет, имитирующий солнечный свет
+  directionalLight.position.set(50, 50, 100).normalize();
+  scene.add(directionalLight);
+
+  const pointLight = new THREE.PointLight(0xffffff, 1); // Точечный свет для дополнительных теней
+  pointLight.position.set(10, 10, 50);
+  scene.add(pointLight);
 
   const animate = () => {
     requestAnimationFrame(animate);
@@ -132,12 +152,58 @@ function createTextSprite(message: string, parameters: any = {}) {
 function updateScene(entities: Entity[]) {
   entities.forEach((obj) => {
     if (!objects.has(obj.id)) {
-      const geometry = new THREE.SphereGeometry(1, 32, 32);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        wireframe: true,
-      });
-      const sphere = new THREE.Mesh(geometry, material);
+      let geometry: THREE.BufferGeometry;
+      let material: THREE.MeshStandardMaterial;
+
+      if (obj instanceof HeightmapTerrain) {
+        const shape = obj.body.shapes[0] as unknown as CANNON.Heightfield;
+        const { data, elementSize } = shape;
+        
+        // Создаем плоскость для террейна
+        const terrainGeometry = new THREE.PlaneGeometry(
+          elementSize * (data.length - 1),
+          elementSize * (data[0].length - 1),
+          data.length - 1,
+          data[0].length - 1
+        );
+
+        const positionAttribute = terrainGeometry.attributes.position;
+        for (let i = 0; i < positionAttribute.count; i++) {
+          const x = i % data.length;
+          const y = Math.floor(i / data.length);
+          positionAttribute.setZ(i, data[y][x]);
+        }
+
+        positionAttribute.needsUpdate = true;
+        terrainGeometry.computeVertexNormals();
+        geometry = terrainGeometry;
+        material = new THREE.MeshStandardMaterial({
+          blendColor:  0x0000ff,
+          color: 0x0000ff,
+        });
+      } else if (obj instanceof FlightObject) {
+        geometry = new THREE.SphereGeometry(1, 32, 32);
+        material = new THREE.MeshStandardMaterial({
+          color: 0xff0000,
+          wireframe: true,
+        });
+      } else if (obj instanceof Radar) {
+        geometry = new THREE.SphereGeometry(1, 32, 32);
+        material = new THREE.MeshStandardMaterial({
+          color: 0x00ff00,
+          wireframe: true,
+        });
+      } else if (obj instanceof Camera) {
+        geometry = new THREE.SphereGeometry(1, 32, 32);
+        material = new THREE.MeshStandardMaterial({
+          color: 0xff00ff,
+          wireframe: true,
+        });
+      } else {
+        return;
+      }
+
+      const mesh = new THREE.Mesh(geometry, material);
 
       const text = createTextSprite(
         `${obj.body.position.x.toFixed(2)}|${obj.body.position.y.toFixed(2)}|${
@@ -145,9 +211,9 @@ function updateScene(entities: Entity[]) {
         }`,
       );
 
-      scene.add(sphere);
+      scene.add(mesh);
       scene.add(text);
-      objects.set(obj.id, { sphere, text });
+      objects.set(obj.id, { sphere: mesh, text });
     }
 
     const objectData = objects.get(obj.id);
@@ -191,3 +257,4 @@ function updateScene(entities: Entity[]) {
     }
   });
 }
+
