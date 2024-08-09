@@ -77,6 +77,8 @@ class MissionManager {
           radarBody,
           radarData.minElevationAngle,
           radarData.maxElevationAngle,
+          1000,
+          1
         );
       } else if (radarData.type === "sector") {
         radar = new SectorRadar(
