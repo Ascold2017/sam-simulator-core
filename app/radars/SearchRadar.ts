@@ -31,31 +31,26 @@ class SearchRadar extends Radar {
       this.resetSweep();
       return;
     }
-  
+
     this.updateSweep(deltaTime);
-  
-    const sweepStart = this.sweepAngle - (Math.PI / 60); // 3° в радианах = π/60
-    const sweepEnd = this.sweepAngle + (Math.PI / 60);
-  
-    // Удаляем объекты, которые больше не находятся в зоне видимости текущего угла развертки
-    const newRadarObjects = this.detectedFlightObjects.filter((dfo) => {
-      const azimuth = dfo.azimuth;
-      return !this.isWithinSweep(azimuth, sweepStart, sweepEnd);
-    });
-  
+
     // Добавляем новые объекты, которые попадают в зону видимости текущего угла развертки
-    const allRadarObjects = this.flightObjects.map(fo => new RadarObject(fo.id, fo.body, fo.velocity, this));
-    
+    const allRadarObjects = this.flightObjects.map((fo) =>
+      new RadarObject(fo.id, fo.body, fo.velocity, this)
+    );
+
+    const newRadarObjects = this.detectedFlightObjects.filter((ro) =>
+      !this.isWithinSweep(ro.azimuth)
+    );
+
     allRadarObjects.forEach((ro) => {
-      if (
-        this.isWithinSweep(ro.azimuth, sweepStart, sweepEnd) &&
-        this.isWithinElevation(ro.elevation) &&
-        !this.detectedFlightObjects.some((obj) => obj.id === ro.id)
-      ) {
-        newRadarObjects.push(ro);
+      if (this.isWithinSweep(ro.azimuth) && this.isWithinElevation(ro.elevation)) {
+        if (!newRadarObjects.some((obj) => obj.id === ro.id)) {
+          newRadarObjects.push(ro);
+        }
       }
     });
-
+    
     this.detectedFlightObjects = newRadarObjects;
   }
 
@@ -72,31 +67,14 @@ class SearchRadar extends Radar {
     this.detectedFlightObjects = [];
   }
 
-  private isWithinSweep(angleToObject: number, sweepStart: number, sweepEnd: number): boolean {
-    // Нормализуем углы в диапазон [0, 2π]
-    const normalizedAngle = this.normalizeAngleTo2Pi(angleToObject);
-    const normalizedSweepStart = this.normalizeAngleTo2Pi(sweepStart);
-    const normalizedSweepEnd = this.normalizeAngleTo2Pi(sweepEnd);
-  
-    if (normalizedSweepStart > normalizedSweepEnd) {
-      return (
-        normalizedAngle >= normalizedSweepStart || normalizedAngle <= normalizedSweepEnd
-      );
-    } else {
-      return normalizedAngle >= normalizedSweepStart && normalizedAngle <= normalizedSweepEnd;
-    }
+  private isWithinSweep(angleToObject: number): boolean {
+    return Math.abs(angleToObject - this.sweepAngle) < (Math.PI / 60)
   }
-  
+
   private isWithinElevation(elevationAngle: number): boolean {
-    return elevationAngle >= this.minElevationAngle && elevationAngle <= this.maxElevationAngle;
+    return elevationAngle >= this.minElevationAngle &&
+      elevationAngle <= this.maxElevationAngle;
   }
-
-  private normalizeAngleTo2Pi(angle: number): number {
-    while (angle < 0) angle += 2 * Math.PI;
-    while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
-    return angle;
-  }
-
 }
 
 export default SearchRadar;

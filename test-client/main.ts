@@ -32,7 +32,7 @@ const missionData: MissionData = {
       minElevationAngle: 0,
       maxElevationAngle: Math.PI / 4,
       maxDistance: 10000,
-      sweepSpeed: 1
+      sweepSpeed: 0.5
     },
   ],
   cameras: [
