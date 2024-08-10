@@ -1,5 +1,6 @@
 import Engine from "../core/Engine";
 import Radar from "../core/Radar";
+import SectorRadar from "../radars/SectorRadar";
 
 type RadarUpdateCallback = (radar: Radar) => void;
 
@@ -23,6 +24,13 @@ class RadarManager {
     const radar = this.getRadarById(radarId);
     if (radar) {
       radar.isEnabled = isEnabled;
+    }
+  }
+
+  setAngleSectorRadarById(radarId: string, azimuth: number, elevation: number) {
+    const radar = this.getRadarById(radarId);
+    if (radar && radar instanceof SectorRadar) {
+      radar.setAngle(azimuth, elevation)
     }
   }
 
