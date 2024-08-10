@@ -3,9 +3,12 @@ import { GUI } from "dat.gui";
 import { Core } from "../app/index";
 import Radar from "../app/core/Radar";
 import SectorRadar from "../app/radars/SectorRadar";
+import SearchRadar from "../app/radars/SearchRadar";
+import { RadarDisplay } from "./RadarDisplay";
 
 export class RadarGUIManager {
     private gui: GUI;
+    private radarDisplays: Map<string, RadarDisplay> = new Map();
 
     constructor(
         private core: Core,
@@ -16,12 +19,23 @@ export class RadarGUIManager {
         this.setupRadarGUI();
     }
 
+    update() {
+        // Обновляем положения дисплеев и их содержимое
+        this.radarDisplays.forEach((display) => {
+            display.update();
+        });
+    }
+
     private setupRadarGUI() {
         const radars = this.core.engine.getRadars();
         radars.forEach((radar: any) => {
             this.createRadarControls(radar);
+            if (radar instanceof SearchRadar) {
+                this.createRadarDisplay(radar);
+            }
         });
     }
+
     private createRadarControls(radar: Radar) {
         const radarFolder = this.gui.addFolder(radar.id);
         radarFolder.add(radar, "isEnabled").name("Enabled").onChange(
@@ -56,5 +70,10 @@ export class RadarGUIManager {
                 .listen();
         }
         radarFolder.open();
+    }
+
+    private createRadarDisplay(radar: SearchRadar) {
+        const radarDisplay = new RadarDisplay(radar, this.scene, this.camera);
+        this.radarDisplays.set(radar.id, radarDisplay);
     }
 }

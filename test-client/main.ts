@@ -30,7 +30,10 @@ class TestClient {
     );
 
     // Подписка на обновление движка
-    this.core.engine.addEventListener("update", () => this.sceneInitializer.updateFlightObjects());
+    this.core.engine.addEventListener("update", () => {
+      this.sceneInitializer.updateFlightObjects()
+     
+  });
 
     // Запуск рендер-цикла
     this.animate();
@@ -46,6 +49,7 @@ class TestClient {
     requestAnimationFrame(() => this.animate());
 
     this.sceneInitializer.updateScene()
+    this.radarGUIManager.update();
   }
 }
 

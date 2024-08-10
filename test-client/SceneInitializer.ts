@@ -34,7 +34,8 @@ export class SceneInitializer {
             10000,
         );
         this.camera.position.set(100, -100, 100);
-        this.camera.rotation.x = Math.PI / 2;
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0))
+        
 
         // Настройка рендерера
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -128,7 +129,7 @@ export class SceneInitializer {
     }
 
     private createMeshForFlightObject(flightObject: FlightObject): THREE.Mesh {
-        const geometry = new THREE.SphereGeometry(1, 32, 32);
+        const geometry = new THREE.SphereGeometry(10, 32, 32);
         const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(
