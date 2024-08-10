@@ -6,9 +6,11 @@ interface TargetObjectConstructor {
   id: string;
   initialPosition: Position;
   size: number;
+  rcs: number
 }
 class TargetObject extends FlightObject {
-  constructor({ id, initialPosition, size }: TargetObjectConstructor) {
+  rcs: number;
+  constructor({ id, initialPosition, size, rcs }: TargetObjectConstructor) {
     const body = new CANNON.Body({
       mass: 1,
       position: new CANNON.Vec3(
@@ -21,6 +23,7 @@ class TargetObject extends FlightObject {
     });
 
     super(id, body, new CANNON.Vec3(0, 0, 0));
+    this.rcs = rcs;
   }
 
   updateCallback(deltaTime: number): void {

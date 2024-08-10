@@ -43,7 +43,8 @@ class MissionManager {
       const target = new TargetObject({
         id: targetData.id,
         initialPosition: targetData.waypoints[0].position,
-        size: targetData.size
+        size: targetData.size,
+        rcs: targetData.rcs
       });
       this.engine.addEntity(target);
       // Устанавливаем маршруты для целей
@@ -62,6 +63,7 @@ class MissionManager {
         minElevationAngle: radarData.minElevationAngle,
         maxElevationAngle: radarData.maxElevationAngle,
         detectionRange: radarData.maxDistance,
+        heightmapTerrain: this.engine.getHeightmapTerrain()!
       }
       let radar;
       if (radarData.type === "search") {

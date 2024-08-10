@@ -3,6 +3,7 @@ import Entity from "./Entity";
 import FlightObject from "./FlightObject";
 import Radar from "./Radar";
 import Camera from "./Camera";
+import HeightmapTerrain from "./HeightmapTerrain";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -17,8 +18,6 @@ class Engine {
 
   constructor() {
     this.world = new CANNON.World();
-
-    // this.world.gravity.set(0, 0, -9.82);
   }
 
   getEntities() {
@@ -35,6 +34,10 @@ class Engine {
 
   getCameras() {
     return this.entities.filter((e) => e instanceof Camera);
+  }
+
+  getHeightmapTerrain() {
+    return this.entities.find(e => e instanceof HeightmapTerrain);
   }
 
   addEntity(entity: Entity) {

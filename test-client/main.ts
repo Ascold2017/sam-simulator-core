@@ -15,16 +15,16 @@ const missionData: MissionData = {
     size: 100,
     data: [
       [0, 1, 2, 3, 4],
-      [1, 2, 3, 4, 3],
+      [1, 2, 17, 20, 3],
       [2, 3, 5, 3, 2],
       [1, 2, 3, 2, 1],
-      [0, 1, 2, 1, 0],
+      [0, 1, 50, 1, 0],
     ],
   },
   targets: [
     {
       id: "target1",
-      rcs: 1,
+      rcs: 0.5,
       temperature: 50,
       size: 2,
       waypoints: [
@@ -61,6 +61,7 @@ const missionData: MissionData = {
 core.missionManager.createEntities(missionData);
 core.radarManager.subscribeToRadarUpdates("radar1", (radar) => {
   const searcRadar = radar as SearchRadar;
+  console.log(searcRadar.getState())
 });
 core.radarManager.toggleRadarById("radar1", true);
 
@@ -180,6 +181,7 @@ function updateScene(entities: Entity[]) {
         material = new THREE.MeshStandardMaterial({
           blendColor:  0x0000ff,
           color: 0x0000ff,
+          wireframe: true
         });
       } else if (obj instanceof FlightObject) {
         geometry = new THREE.SphereGeometry(1, 32, 32);

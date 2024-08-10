@@ -2,6 +2,7 @@ import Entity from "./Entity";
 import * as CANNON from "cannon-es";
 import FlightObject from "./FlightObject";
 import { Position } from "../types";
+import HeightmapTerrain from "./HeightmapTerrain";
 
 export interface RadarConstructor {
   id: string;
@@ -9,16 +10,18 @@ export interface RadarConstructor {
   minElevationAngle: number;
   maxElevationAngle: number;
   detectionRange: number;
+  heightmapTerrain: HeightmapTerrain
 }
 class Radar extends Entity {
   protected minElevationAngle: number;
   protected maxElevationAngle: number;
-  protected detectionRange: number;
+  detectionRange: number;
   protected flightObjects: FlightObject[] = [];
+  private ground: HeightmapTerrain;
   isEnabled: boolean = false;
 
   constructor(
-    { id, position, minElevationAngle, maxElevationAngle, detectionRange }:
+    { id, position, minElevationAngle, maxElevationAngle, detectionRange, heightmapTerrain }:
       RadarConstructor,
   ) {
     const body = new CANNON.Body({
@@ -27,13 +30,24 @@ class Radar extends Entity {
       position: new CANNON.Vec3(position.x, position.y, position.z),
     });
     super(id, body);
+    this.ground = heightmapTerrain;
     this.minElevationAngle = minElevationAngle;
     this.maxElevationAngle = maxElevationAngle;
     this.detectionRange = detectionRange;
   }
 
   setFlightObjects(flightObjects: FlightObject[]) {
-    this.flightObjects = flightObjects;
+    // Фильтрация объектов по дальности и проверка на прямую видимость
+    this.flightObjects = flightObjects.filter((flightObject) => {
+      const distance = this.calculateDistance(flightObject);
+
+      if (distance > this.detectionRange) {
+        return false; // Объект вне диапазона обнаружения
+      }
+
+      // Проверка прямой видимости
+      return this.hasLineOfSight(flightObject);
+    });
   }
 
   protected scan(deltaTime: number) {
@@ -43,6 +57,35 @@ class Radar extends Entity {
   update(deltaTime: number): void {
     super.update(deltaTime);
     this.scan(deltaTime);
+  }
+
+  // Метод для вычисления расстояния до объекта
+  private calculateDistance(flightObject: FlightObject): number {
+    const radarPosition = this.body.position;
+    const objectPosition = flightObject.body.position;
+
+    return radarPosition.distanceTo(objectPosition);
+  }
+
+  // Метод для проверки прямой видимости объекта
+  private hasLineOfSight(flightObject: FlightObject): boolean {
+    const from = this.body.position;
+    const to = flightObject.body.position;
+
+    // Выполняем трассировку
+    const result = new CANNON.RaycastResult();
+    const ray = new CANNON.Ray(from, to);
+
+    // Проверяем, пересекает ли луч какие-либо объекты на пути к цели
+    ray.intersectBodies(this.getAllPotentialObstacles(), result);
+
+    // Если результат трассировки показывает пересечение, значит видимость закрыта
+    return !result.hasHit;
+  }
+
+  // Метод для получения всех потенциальных препятствий
+  private getAllPotentialObstacles(): CANNON.Body[] {
+    return [this.ground.body];
   }
 }
 

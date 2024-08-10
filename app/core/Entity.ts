@@ -12,10 +12,11 @@ class Entity {
   }
 
   update(deltaTime: number) {
-    // Implement specific logic for entity update
+    // FOR OVERRIDE
   }
 
   destroy() {
+    // Mark as destroyed. Engine will remove this entity at nearby update
     this.isDestroyed = true;
   }
 }

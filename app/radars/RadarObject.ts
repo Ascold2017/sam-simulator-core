@@ -1,14 +1,22 @@
 import * as CANNON from 'cannon-es';
 import FlightObject from '../core/FlightObject';
 import Radar from '../core/Radar';
+import TargetObject from '../flightObjects/TargetObject';
 
 class RadarObject {
   private flightObject: FlightObject;
   private radar: Radar;
+  private minimalSignalVolume: number;
+  signalVolume: number;
+  rcs: number
+  
 
   constructor(flightObject: FlightObject, radar: Radar) {
     this.flightObject = flightObject 
     this.radar = radar;
+    this.rcs = this.calculateRCS();
+    this.minimalSignalVolume = this.calculateMinimalSignalVolume();
+    this.signalVolume = this.calculateSignalVolume();
   }
 
   get id() {
@@ -48,6 +56,11 @@ class RadarObject {
     return relativeVelocity.dot(directionToObject);
   }
 
+   // Свойство isDetected
+   get isDetected(): boolean {
+    return this.signalVolume >= this.minimalSignalVolume;
+  }
+
   private directionToRadar(): CANNON.Vec3 {
     return new CANNON.Vec3(
       this.flightObject.body.position.x - this.radar.body.position.x,
@@ -60,6 +73,26 @@ class RadarObject {
     while (angle < 0) angle += 2 * Math.PI;
     while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
     return angle;
+  }
+
+  // Рассчитываем RCS объекта
+  private calculateRCS(): number {
+    if (this.flightObject instanceof TargetObject) {
+      return this.flightObject.rcs;
+    }
+    return 1; // По умолчанию RCS = 1 для нецелевых объектов
+  }
+
+  // Рассчитываем объем сигнала (signalVolume)
+  private calculateSignalVolume(): number {
+    // В формуле используется обратно пропорциональная зависимость от квадрата расстояния
+    // Чем меньше расстояние, тем больше сигнал
+    return this.rcs / Math.pow(this.distance, 2);
+  }
+
+   // Метод для расчета minimalSignalVolume
+   private calculateMinimalSignalVolume(): number {
+    return 1 / Math.pow(this.radar.detectionRange, 2);
   }
 }
 
