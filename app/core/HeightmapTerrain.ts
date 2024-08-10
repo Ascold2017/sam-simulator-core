@@ -3,13 +3,15 @@ import Entity from './Entity';
 
 class HeightmapTerrain extends Entity {
   constructor(data: number[][], elementSize: number) {
-    const shape = new CANNON.Heightfield(data, {
-      elementSize
-    });
     
-    const body = new CANNON.Body();
+    const body = new CANNON.Body({
+      mass: 0,
+      type: CANNON.Body.STATIC,
+      shape: new CANNON.Heightfield(data, {
+        elementSize
+      })
+    });
 
-    body.addShape(shape);
     super('heightmap', body);
   }
 }

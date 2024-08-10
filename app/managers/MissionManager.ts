@@ -14,6 +14,7 @@ import {
   TargetData,
 } from "../types";
 import TargetManager from "./TargetManager";
+import { RadarConstructor } from "../core/Radar";
 
 class MissionManager {
   engine: Engine;
@@ -33,25 +34,17 @@ class MissionManager {
 
   private initTerrain(mapData: MapData) {
     const terrain = new HeightmapTerrain(mapData.data, mapData.size);
-    console.log(terrain)
     this.engine.addEntity(terrain);
   }
 
   private initTargets(targets: TargetData[]) {
     for (const targetData of targets) {
-      const targetBody = new CANNON.Body({
-        mass: 1,
-        position: new CANNON.Vec3(
-          targetData.waypoints[0].position.x,
-          targetData.waypoints[0].position.y,
-          targetData.waypoints[0].position.z,
-        ),
+      
+      const target = new TargetObject({
+        id: targetData.id,
+        initialPosition: targetData.waypoints[0].position,
+        size: targetData.size
       });
-      const target = new TargetObject(
-        targetData.id,
-        targetBody,
-        new CANNON.Vec3(0, 0, 0),
-      );
       this.engine.addEntity(target);
       // Устанавливаем маршруты для целей
       this.targetManager.updateRoute({
@@ -63,32 +56,27 @@ class MissionManager {
 
   private initRadars(radars: RadarData[]) {
     for (const radarData of radars) {
-      const radarBody = new CANNON.Body({
-        mass: 0,
-        position: new CANNON.Vec3(
-          radarData.position.x,
-          radarData.position.y,
-          radarData.position.z,
-        ),
-      });
+      const common: RadarConstructor = {
+        id: radarData.id,
+        position: radarData.position,
+        minElevationAngle: radarData.minElevationAngle,
+        maxElevationAngle: radarData.maxElevationAngle,
+        detectionRange: radarData.maxDistance,
+      }
       let radar;
       if (radarData.type === "search") {
         radar = new SearchRadar(
-          radarData.id,
-          radarBody,
-          radarData.minElevationAngle,
-          radarData.maxElevationAngle,
-          radarData.maxDistance,
-          radarData.sweepSpeed
+          {
+            ...common,
+            sweepSpeed: radarData.sweepSpeed!,
+          }
         );
       } else if (radarData.type === "sector") {
         radar = new SectorRadar(
-          radarData.id,
-          radarBody,
-          radarData.minElevationAngle,
-          radarData.maxElevationAngle,
-          radarData.azimuthAngle!,
-          radarData.viewAngle!,
+          {
+            ...common,
+            viewAngle: radarData.viewAngle!
+          }
         );
       }
       this.engine.addEntity(radar!);

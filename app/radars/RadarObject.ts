@@ -1,13 +1,18 @@
 import * as CANNON from 'cannon-es';
-import FlightObject from './FlightObject';
-import Radar from './Radar';
+import FlightObject from '../core/FlightObject';
+import Radar from '../core/Radar';
 
-class RadarObject extends FlightObject {
+class RadarObject {
+  private flightObject: FlightObject;
   private radar: Radar;
 
-  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3, radar: Radar) {
-    super(id, body, velocity);
+  constructor(flightObject: FlightObject, radar: Radar) {
+    this.flightObject = flightObject 
     this.radar = radar;
+  }
+
+  get id() {
+    return this.flightObject.id
   }
 
   // Азимут относительно радара
@@ -37,7 +42,7 @@ class RadarObject extends FlightObject {
 
   // Радиальная скорость относительно радара
   get radialVelocity(): number {
-    const relativeVelocity = this.velocity.vsub(this.radar.body.velocity);
+    const relativeVelocity = this.flightObject.velocity.vsub(this.radar.body.velocity);
     const directionToObject = this.directionToRadar();
     directionToObject.normalize();
     return relativeVelocity.dot(directionToObject);
@@ -45,9 +50,9 @@ class RadarObject extends FlightObject {
 
   private directionToRadar(): CANNON.Vec3 {
     return new CANNON.Vec3(
-      this.body.position.x - this.radar.body.position.x,
-      this.body.position.y - this.radar.body.position.y,
-      this.body.position.z - this.radar.body.position.z
+      this.flightObject.body.position.x - this.radar.body.position.x,
+      this.flightObject.body.position.y - this.radar.body.position.y,
+      this.flightObject.body.position.z - this.radar.body.position.z
     );
   }
 

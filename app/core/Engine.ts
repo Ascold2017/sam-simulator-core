@@ -1,8 +1,8 @@
 import * as CANNON from "cannon-es";
-import Entity from './Entity';
-import FlightObject from './FlightObject';
-import Radar from './Radar';
-import Camera from './Camera';
+import Entity from "./Entity";
+import FlightObject from "./FlightObject";
+import Radar from "./Radar";
+import Camera from "./Camera";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -17,6 +17,7 @@ class Engine {
 
   constructor() {
     this.world = new CANNON.World();
+
     // this.world.gravity.set(0, 0, -9.82);
   }
 
@@ -25,15 +26,15 @@ class Engine {
   }
 
   getFlightObjects() {
-    return this.entities.filter(e => e instanceof FlightObject)
+    return this.entities.filter((e) => e instanceof FlightObject);
   }
 
   getRadars() {
-    return this.entities.filter(e => e instanceof Radar)
+    return this.entities.filter((e) => e instanceof Radar);
   }
 
   getCameras() {
-    return this.entities.filter(e => e instanceof Camera)
+    return this.entities.filter((e) => e instanceof Camera);
   }
 
   addEntity(entity: Entity) {
@@ -51,11 +52,11 @@ class Engine {
 
   update(deltaTime: number) {
     this.world.step(deltaTime * this.timeScale);
-    this.entities = this.entities.filter(e => !e.isDestroyed)
+    this.entities = this.entities.filter((e) => !e.isDestroyed);
     for (const entity of this.entities) {
       entity.update(deltaTime * this.timeScale);
     }
-    this.dispatchEvent('update', deltaTime * this.timeScale);
+    this.dispatchEvent("update", deltaTime * this.timeScale);
   }
 
   start() {

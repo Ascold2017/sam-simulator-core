@@ -1,20 +1,21 @@
-import Radar from '../core/Radar';
-import * as CANNON from "cannon-es";
+import Radar, { RadarConstructor } from '../core/Radar';
 
-
+interface SectorRadarConstructor extends RadarConstructor {
+  viewAngle: number
+}
 class SectorRadar extends Radar {
-  azimuthAngle: number;
+  private elevationAngle: number;
+  private azimuthAngle: number;
   viewAngle: number;
 
-  constructor(id: string, body: CANNON.Body, minElevationAngle: number, maxElevationAngle: number, azimuthAngle: number, viewAngle: number) {
-    super(id, body, minElevationAngle, maxElevationAngle);
-    this.azimuthAngle = azimuthAngle;
+  constructor({ viewAngle, ...radarParams }: SectorRadarConstructor) {
+    super(radarParams);
+    this.azimuthAngle = 0;
+    this.elevationAngle = 0;
     this.viewAngle = viewAngle;
   }
 
-  scan() {
-    // Specific logic for sector scanning
-    super.scan();
+  scan(deltaTime: number) {
   }
 }
 
