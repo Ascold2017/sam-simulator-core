@@ -30,7 +30,7 @@ class TestClient {
     );
 
     // Подписка на обновление движка
-    this.core.engine.addEventListener("update", this.updateScene.bind(this));
+    this.core.engine.addEventListener("update", () => this.sceneInitializer.updateFlightObjects());
 
     // Запуск рендер-цикла
     this.animate();
@@ -41,22 +41,11 @@ class TestClient {
     this.core.missionManager.createEntities(missionData);
   }
 
-  // Обновление сцены
-  private updateScene() {
-    this.core.engine.getFlightObjects().forEach((obj) => {
-      const mesh = this.sceneInitializer.scene.getObjectByName(obj.id);
-      if (mesh) {
-        mesh.position.set(obj.body.position.x, obj.body.position.y, obj.body.position.z);
-      }
-    });
-  }
-
   // Рендер-цикл
   private animate() {
     requestAnimationFrame(() => this.animate());
 
-    this.sceneInitializer.renderer.render(this.sceneInitializer.scene, this.sceneInitializer.camera);
-    this.sceneInitializer.controls.update();
+    this.sceneInitializer.updateScene()
   }
 }
 
