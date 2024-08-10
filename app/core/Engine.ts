@@ -14,7 +14,7 @@ class Engine {
   private eventListeners: { [key: string]: Function[] } = {};
   private lastUpdateTime: number = Date.now();
   private isRunning: boolean = false;
-  private timeScale: number = 1; // Начальное значение timeScale
+  timeScale: number = 1; // Начальное значение timeScale
 
   constructor() {
     this.world = new CANNON.World();
