@@ -19,6 +19,7 @@ export class SceneInitializer {
     constructor(private core: Core) {
         // Создание сцены
         this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x87CEEB); // Светло-голубой цвет
 
         const gridHelper = new THREE.GridHelper(1000);
         gridHelper.rotation.x = Math.PI / 2;
@@ -29,7 +30,7 @@ export class SceneInitializer {
             75,
             window.innerWidth / window.innerHeight,
             0.1,
-            1000,
+            10000,
         );
         this.camera.position.set(50, -50, 10);
 
@@ -62,7 +63,8 @@ export class SceneInitializer {
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(50, 50, 50).normalize();
+        directionalLight.position.set(50, 50, 500).normalize();
+        directionalLight.lookAt(0, 0, 0)
         this.scene.add(directionalLight);
 
         const dirLightHelper = new THREE.DirectionalLightHelper(

@@ -3,13 +3,7 @@ import { MissionData } from "../app";
 export const missionData: MissionData = {
     map: {
       size: 100,
-      data: [
-        [0, 1, 2, 3, 4],
-        [1, 2, 17, 20, 3],
-        [2, 3, 5, 3, 2],
-        [1, 2, 3, 2, 1],
-        [0, 1, 50, 1, 0],
-      ],
+      data:  generateTerrainMap(100),
     },
     targets: [
       {
@@ -19,8 +13,8 @@ export const missionData: MissionData = {
         size: 2,
         waypoints: [
           { position: { x: 0, y: 0, z: 20 }, speed: 20 },
-          { position: { x: 50, y: 50, z: 16 }, speed: 17 },
-          { position: { x: -20, y: -20, z: 9 }, speed: 15 },
+          { position: { x: 50, y: 50, z: 23 }, speed: 17 },
+          { position: { x: -20, y: -20, z: 20 }, speed: 15 },
         ],
       },
     ],
@@ -28,7 +22,7 @@ export const missionData: MissionData = {
       {
         id: "radar1",
         type: "search",
-        position: { x: 5, y: 10, z: 7 },
+        position: { x: 5, y: 10, z: 5 },
         minElevationAngle: 0,
         maxElevationAngle: Math.PI / 4,
         maxDistance: 10000,
@@ -37,7 +31,7 @@ export const missionData: MissionData = {
       {
         id: "radar2",
         type: "sector",
-        position: { x: 5, y: 20, z: 7 },
+        position: { x: 5, y: 20, z: 5 },
         minElevationAngle: 0,
         maxElevationAngle: Math.PI / 4,
         maxDistance: 10000,
@@ -56,3 +50,40 @@ export const missionData: MissionData = {
       },
     ],
   };
+
+  function generateTerrainMap(size: number): number[][] {
+    const map = Array.from({ length: size }, () => Array(size).fill(0));
+
+    // Генерация равнинной местности
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+            map[i][j] = Math.floor(Math.random() * 3) - 2; // Высота от -5 до +20 метров
+        }
+    }
+
+    // Генерация первого гребня гор ближе к центру карты
+    const mountain1StartX = Math.floor(-size * 0.6);
+    const mountain1EndX = Math.floor(-size * 0.7);
+    const mountain1StartY = Math.floor(-size * 0.6);
+    const mountain1EndY = Math.floor(-size * 0.76);
+
+    for (let i = mountain1StartX; i < mountain1EndX; i++) {
+        for (let j = mountain1StartY; j < mountain1EndY; j++) {
+            map[i][j] = Math.floor(Math.random() * 53) + 20; // Высота от 20 до 550 метров
+        }
+    }
+
+    // Генерация второго гребня гор ближе к центру карты
+    const mountain2StartX = Math.floor(size * 0.6);
+    const mountain2EndX = Math.floor(size * 0.7);
+    const mountain2StartY = Math.floor(size * 0.6);
+    const mountain2EndY = Math.floor(size * 0.8);
+
+    for (let i = mountain2StartX; i < mountain2EndX; i++) {
+        for (let j = mountain2StartY; j < mountain2EndY; j++) {
+            map[i][j] = Math.floor(Math.random() * 53) + 20; // Высота от 20 до 550 метров
+        }
+    }
+
+    return map;
+}
