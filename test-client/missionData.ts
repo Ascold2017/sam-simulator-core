@@ -7,7 +7,7 @@ export const missionData: MissionData = {
     },
     targets: [
       {
-        id: "target1",
+        id: "target-1",
         rcs: 0.5,
         temperature: 50,
         size: 2,
@@ -20,7 +20,7 @@ export const missionData: MissionData = {
     ],
     radars: [
       {
-        id: "radar1",
+        id: "search-radar-0",
         type: "search",
         position: { x: 5, y: 10, z: 5 },
         minElevationAngle: 0,
@@ -29,18 +29,18 @@ export const missionData: MissionData = {
         sweepSpeed: 0.5,
       },
       {
-        id: "radar2",
+        id: "sector-radar-0",
         type: "sector",
         position: { x: 5, y: 20, z: 5 },
         minElevationAngle: 0,
-        maxElevationAngle: Math.PI / 4,
+        maxElevationAngle: Math.PI / 6,
         maxDistance: 10000,
         viewAngle: Math.PI / 6,
       },
     ],
     cameras: [
       {
-        id: "camera1",
+        id: "tv-camera-1",
         type: "tv",
         position: { x: 2, y: 7, z: 7 },
         minElevationAngle: -Math.PI / 6,

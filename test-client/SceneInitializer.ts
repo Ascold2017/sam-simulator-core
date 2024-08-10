@@ -8,6 +8,7 @@ import Radar from "../app/core/Radar";
 import HeightmapTerrain from "../app/core/HeightmapTerrain";
 import Camera from "../app/core/Camera";
 import SearchRadar from "../app/radars/SearchRadar";
+import SectorRadar from "../app/radars/SectorRadar";
 
 export class SceneInitializer {
     scene: THREE.Scene;
@@ -32,7 +33,8 @@ export class SceneInitializer {
             0.1,
             10000,
         );
-        this.camera.position.set(50, -50, 10);
+        this.camera.position.set(100, -100, 100);
+        this.camera.rotation.x = Math.PI / 2;
 
         // Настройка рендерера
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -64,7 +66,7 @@ export class SceneInitializer {
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(50, 50, 500).normalize();
-        directionalLight.lookAt(0, 0, 0)
+        directionalLight.lookAt(0, 0, 0);
         this.scene.add(directionalLight);
 
         const dirLightHelper = new THREE.DirectionalLightHelper(
@@ -100,6 +102,11 @@ export class SceneInitializer {
             // Добавляем визуализацию лучей для SearchRadar
             if (radar instanceof SearchRadar) {
                 const beamMesh = this.createBeamForSearchRadar(radar);
+                this.scene.add(beamMesh);
+            }
+            // Добавляем визуализацию лучей для SectorRadar
+            if (radar instanceof SectorRadar) {
+                const beamMesh = this.createBeamForSectorRadar(radar);
                 this.scene.add(beamMesh);
             }
         });
@@ -149,64 +156,137 @@ export class SceneInitializer {
     }
 
     private createBeamForSearchRadar(radar: SearchRadar): THREE.Mesh {
-        const { detectionRange, minElevationAngle, maxElevationAngle, body } = radar;
+        const { detectionRange, minElevationAngle, maxElevationAngle, body } =
+            radar;
         const angle = Math.PI / 60;
-    
+
         // Создаем вершины пирамиды, корректируя ориентацию
         const vertices = new Float32Array([
-            0, 0, 0, // Вершина пирамиды (позиция радара)
+            0,
+            0,
+            0, // Вершина пирамиды (позиция радара)
 
-            detectionRange * Math.cos(minElevationAngle), 
+            detectionRange * Math.cos(minElevationAngle),
             detectionRange * Math.sin(minElevationAngle) * Math.sin(-angle),
             detectionRange * Math.sin(minElevationAngle) * Math.cos(-angle),
 
-            detectionRange * Math.cos(maxElevationAngle), 
+            detectionRange * Math.cos(maxElevationAngle),
             detectionRange * Math.sin(maxElevationAngle) * Math.sin(-angle),
             detectionRange * Math.sin(maxElevationAngle) * Math.cos(-angle),
 
-            detectionRange * Math.cos(maxElevationAngle), 
+            detectionRange * Math.cos(maxElevationAngle),
             detectionRange * Math.sin(maxElevationAngle) * Math.sin(angle),
             detectionRange * Math.sin(maxElevationAngle) * Math.cos(angle),
 
-            detectionRange * Math.cos(minElevationAngle), 
+            detectionRange * Math.cos(minElevationAngle),
             detectionRange * Math.sin(minElevationAngle) * Math.sin(angle),
             detectionRange * Math.sin(minElevationAngle) * Math.cos(angle),
         ]);
 
         // Создаем индексы для соединения вершин в грани
         const indices = new Uint16Array([
-            0, 1, 2, // Грань 1
-            0, 2, 3, // Грань 2
-            0, 3, 4, // Грань 3
-            0, 4, 1, // Грань 4
-            1, 2, 3, // Основание пирамиды
-            1, 3, 4, // Основание пирамиды
+            0,
+            1,
+            2, // Грань 1
+            0,
+            2,
+            3, // Грань 2
+            0,
+            3,
+            4, // Грань 3
+            0,
+            4,
+            1, // Грань 4
+            1,
+            2,
+            3, // Основание пирамиды
+            1,
+            3,
+            4, // Основание пирамиды
         ]);
         const beamGeometry = new THREE.BufferGeometry();
-        beamGeometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+        beamGeometry.setAttribute(
+            "position",
+            new THREE.BufferAttribute(vertices, 3),
+        );
         beamGeometry.setIndex(new THREE.BufferAttribute(indices, 1));
         beamGeometry.computeVertexNormals();
-    
+
         const material = new THREE.MeshBasicMaterial({
             color: 0x00ff00,
             wireframe: true,
             opacity: 0.5,
             transparent: true,
         });
-    
+
         const mesh = new THREE.Mesh(beamGeometry, material);
-    
+
         mesh.position.set(body.position.x, body.position.y, body.position.z);
-    
+
         // Подписка на обновление sweepAngle для вращения пирамиды
         this.core.radarManager.subscribeToRadarUpdates(radar.id, () => {
             // Сначала вращаем пирамиду вокруг оси Z на sweepAngle
             mesh.rotation.set(0, 0, radar.getState().sweepAngle);
         });
-    
+
         return mesh;
     }
-    
+
+    private createBeamForSectorRadar(radar: SectorRadar): THREE.Group {
+        const {
+            detectionRange,
+            viewAngle,
+            body,
+        } = radar;
+
+        // Создаем геометрию конуса
+        const geometry = new THREE.ConeGeometry(
+            detectionRange * Math.tan(viewAngle / 2),
+            detectionRange,
+            32,
+        );
+
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xff0000, // Красный цвет для луча
+            wireframe: true,
+            opacity: 0.5,
+            transparent: true,
+        });
+
+        const cone = new THREE.Mesh(geometry, material);
+
+        // Положение конуса: смещаем его вдоль оси Z на половину высоты конуса, чтобы вершина была в позиции радара
+        cone.position.set(detectionRange / 2, 0, 0);
+        cone.rotation.set(Math.PI / 2, 0, Math.PI / 2); // Повернем конус, чтобы он был направлен вдоль оси Y
+
+        // Создаем группу для вращения вокруг вершины
+        const pivot = new THREE.Group();
+        pivot.position.set(body.position.x, body.position.y, body.position.z);
+        pivot.add(cone);
+
+        // Подписка на обновление sweepAngle для вращения пирамиды
+        this.core.radarManager.subscribeToRadarUpdates(radar.id, () => {
+            const { azimuthAngle, elevationAngle } = radar.getState();
+
+            // Создаем кватернионы для азимута и возвышения
+            const azimuthQuaternion = new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1), // Вращаем вокруг оси Y
+                azimuthAngle,
+            );
+
+            const elevationQuaternion = new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, -1, 0), // Вращаем вокруг оси X
+                elevationAngle,
+            );
+
+            // Применяем оба вращения
+            pivot.quaternion.copy(azimuthQuaternion).multiply(
+                elevationQuaternion,
+            );
+        });
+
+        return pivot;
+    }
 
     private createMeshForCamera(camera: Camera): THREE.Mesh {
         const geometry = new THREE.CylinderGeometry(1, 1, 5, 32);
