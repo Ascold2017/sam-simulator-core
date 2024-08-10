@@ -34,6 +34,15 @@ export const missionData: MissionData = {
         maxDistance: 10000,
         sweepSpeed: 0.5,
       },
+      {
+        id: "radar2",
+        type: "sector",
+        position: { x: 5, y: 20, z: 7 },
+        minElevationAngle: 0,
+        maxElevationAngle: Math.PI / 4,
+        maxDistance: 10000,
+        viewAngle: Math.PI / 6,
+      },
     ],
     cameras: [
       {

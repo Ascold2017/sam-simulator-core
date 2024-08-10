@@ -8,8 +8,8 @@ interface SectorRadarConstructor extends RadarConstructor {
 }
 
 class SectorRadar extends Radar {
-  private elevationAngle: number;
-  private azimuthAngle: number;
+  elevationAngle: number;
+  azimuthAngle: number;
   private detectedFlightObjects: RadarObject[];
   viewAngle: number;
 

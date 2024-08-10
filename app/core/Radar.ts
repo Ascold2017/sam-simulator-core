@@ -13,8 +13,8 @@ export interface RadarConstructor {
   heightmapTerrain: HeightmapTerrain
 }
 class Radar extends Entity {
-  protected minElevationAngle: number;
-  protected maxElevationAngle: number;
+  minElevationAngle: number;
+  maxElevationAngle: number;
   detectionRange: number;
   protected flightObjects: FlightObject[] = [];
   private ground: HeightmapTerrain;
