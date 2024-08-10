@@ -37,7 +37,7 @@ export class RadarDisplay {
         const display = new THREE.Mesh(displayGeometry, displayMaterial);
 
         // Позиционирование дисплея
-        display.position.set(0, 0, 50); // Примерное положение
+        display.position.set(-50, -50, 50); // Примерное положение
         display.lookAt(this.camera.position); // Направляем дисплей в камеру
 
         return display;
