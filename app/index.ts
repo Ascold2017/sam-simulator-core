@@ -5,6 +5,7 @@ import { RadarDTO, SearchRadarState, SectorRadarState } from "./dto/Radar.dto";
 import MissionManager from "./managers/MissionManager";
 import RadarManager from "./managers/RadarManager";
 import TargetManager from "./managers/TargetManager";
+import WeaponManager from "./managers/WeaponManager";
 import { MissionData } from "./types.d";
 
 export * from './types.d'
@@ -14,6 +15,7 @@ export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
     private targetManager: TargetManager;
+    weaponManager: WeaponManager
     radarManager: RadarManager;
     updateListener: Function | null = null
     constructor() {
@@ -21,6 +23,7 @@ export class Core {
         this.missionManager = new MissionManager(this.engine)
         this.targetManager = new TargetManager(this.engine);
         this.radarManager = new RadarManager(this.engine);
+        this.weaponManager = new WeaponManager(this.engine)
         this.engine.addEventListener('update', () => {
             this.updateListener && this.updateListener()
         })

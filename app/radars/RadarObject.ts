@@ -50,7 +50,7 @@ class RadarObject {
 
   // Радиальная скорость относительно радара
   get radialVelocity(): number {
-    const relativeVelocity = this.flightObject.velocity.vsub(this.radar.body.velocity);
+    const relativeVelocity = this.flightObject.velocity;
     const directionToObject = this.directionToRadar();
     directionToObject.normalize();
     return relativeVelocity.dot(directionToObject);
