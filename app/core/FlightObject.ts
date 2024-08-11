@@ -21,7 +21,7 @@ class FlightObject extends Entity {
       const gravityCompensation = new CANNON.Vec3(0, 0, -this.body.mass * 9.81);
       this.body.applyForce(gravityCompensation, this.body.position);
     } else {
-      this.body.velocity = this.velocity.scale(deltaTime);
+      this.body.velocity = this.velocity;
     }
     
   }

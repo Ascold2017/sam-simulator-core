@@ -58,7 +58,7 @@ class TargetManager {
       // calculate direction to destination point
       const direction = destPosition.vsub(target.body.position);
       direction.normalize();
-      if (target.body.position.distanceTo(destPosition) < 1) {
+      if (target.body.position.distanceTo(destPosition) < destination.speed) {
         // if we destinated position - call next waypoint
         if (callback) callback();
       } else {
