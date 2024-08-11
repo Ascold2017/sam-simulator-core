@@ -190,7 +190,7 @@ export const missionData: MissionData = {
     // Генерация равнинной местности
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-            map[i][j] = Math.floor(Math.random() * 3) - 2; // Высота от -5 до +20 метров
+            map[i][j] = Math.floor(Math.random() * 25) - 5; // Высота от -5 до +20 метров
         }
     }
 
@@ -202,7 +202,7 @@ export const missionData: MissionData = {
 
     for (let i = mountain1StartX; i < mountain1EndX; i++) {
         for (let j = mountain1StartY; j < mountain1EndY; j++) {
-            map[i][j] = Math.floor(Math.random() * 53) + 20; // Высота от 20 до 550 метров
+            map[i][j] = Math.floor(Math.random() * 531) + 20; // Высота от 20 до 550 метров
         }
     }
 
@@ -214,7 +214,7 @@ export const missionData: MissionData = {
 
     for (let i = mountain2StartX; i < mountain2EndX; i++) {
         for (let j = mountain2StartY; j < mountain2EndY; j++) {
-            map[i][j] = Math.floor(Math.random() * 53) + 20; // Высота от 20 до 550 метров
+            map[i][j] = Math.floor(Math.random() * 531) + 20; // Высота от 20 до 550 метров
         }
     }
 

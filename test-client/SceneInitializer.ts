@@ -1,6 +1,6 @@
 import * as THREE from "three";
-// @ts-ignore
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
     Core,
     FlightObjectDTO,
@@ -35,8 +35,9 @@ export class SceneInitializer {
             0.1,
             10000,
         );
-        this.camera.position.set(100, -100, 100);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.camera.position.set(0, -500, 300);
+        this.camera.up.set(0, 0, 1);
+        this.camera.lookAt(0, 0, 0);
 
         // Настройка рендерера
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -48,6 +49,16 @@ export class SceneInitializer {
             this.camera,
             this.renderer.domElement,
         );
+        this.controls.listenToKeyEvents( window );
+        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        this.controls.dampingFactor = 0.05;
+
+        this.controls.screenSpacePanning = false;
+
+        this.controls.minDistance = 100;
+        this.controls.maxDistance = 1000;
+
+        this.controls.maxPolarAngle = Math.PI / 2;
 
         // Добавление освещения
         this.addLighting();
