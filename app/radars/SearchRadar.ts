@@ -7,7 +7,6 @@ interface SearchRadarConstructor extends RadarConstructor {
 class SearchRadar extends Radar {
   private sweepAngle: number = 0;
   private sweepSpeed: number;
-  private detectedFlightObjects: RadarObject[] = [];
 
   constructor({ sweepSpeed, ...radarParams }: SearchRadarConstructor) {
     super(radarParams);

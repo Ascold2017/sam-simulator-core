@@ -1,9 +1,6 @@
 import * as THREE from "three";
 import { GUI } from "dat.gui";
-import { Core } from "../app/index";
-import Radar from "../app/core/Radar";
-import SectorRadar from "../app/radars/SectorRadar";
-import SearchRadar from "../app/radars/SearchRadar";
+import { Core, RadarDTO } from "../app/index";
 import { RadarDisplay } from "./RadarDisplay";
 
 export class RadarGUIManager {
@@ -21,22 +18,22 @@ export class RadarGUIManager {
 
     update() {
         // Обновляем положения дисплеев и их содержимое
-        this.radarDisplays.forEach((display) => {
-            display.update();
+        this.radarDisplays.forEach((display, id) => {
+            display.update(this.core.getRadars().find(r => r.id === id)!);
         });
     }
 
     private setupRadarGUI() {
-        const radars = this.core.engine.getRadars();
-        radars.forEach((radar: any) => {
+        const radars = this.core.getRadars();
+        radars.forEach((radar) => {
             this.createRadarControls(radar);
-            if (radar instanceof SearchRadar) {
+            if (radar.type === 'search-radar') {
                 this.createRadarDisplay(radar);
             }
         });
     }
 
-    private createRadarControls(radar: Radar) {
+    private createRadarControls(radar: RadarDTO) {
         const radarFolder = this.gui.addFolder(radar.id);
         radarFolder.add(radar, "isEnabled").name("Enabled").onChange(
             (value) => {
@@ -44,7 +41,7 @@ export class RadarGUIManager {
             },
         );
 
-        if (radar instanceof SectorRadar) {
+        if (radar.type === 'sector-radar') {
             radarFolder.add(radar, "azimuthAngle", 0, 2 * Math.PI).name(
                 "Azimuth",
             )
@@ -52,18 +49,18 @@ export class RadarGUIManager {
                     this.core.radarManager.setAngleSectorRadarById(
                         radar.id,
                         value,
-                        radar.elevationAngle,
+                        radar.elevationAngle!,
                     );
                 })
                 .listen();
 
-            radarFolder.add(radar, "elevationAngle", 0, 2 * Math.PI).name(
+            radarFolder.add(radar, "elevationAngle", 0,  Math.PI / 4).name(
                 "Elevation",
             )
                 .onChange((value) => {
                     this.core.radarManager.setAngleSectorRadarById(
                         radar.id,
-                        radar.azimuthAngle,
+                        radar.azimuthAngle!,
                         value,
                     );
                 })
@@ -72,7 +69,7 @@ export class RadarGUIManager {
         radarFolder.open();
     }
 
-    private createRadarDisplay(radar: SearchRadar) {
+    private createRadarDisplay(radar: RadarDTO) {
         const radarDisplay = new RadarDisplay(radar, this.scene, this.camera);
         this.radarDisplays.set(radar.id, radarDisplay);
     }

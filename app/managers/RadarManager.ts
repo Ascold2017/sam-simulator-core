@@ -1,8 +1,9 @@
 import Engine from "../core/Engine";
 import Radar from "../core/Radar";
+import SearchRadar from "../radars/SearchRadar";
 import SectorRadar from "../radars/SectorRadar";
 
-type RadarUpdateCallback = (radar: Radar) => void;
+type RadarUpdateCallback = (radarState: ReturnType<SectorRadar['getState'] | SearchRadar['getState']>) => void;
 
 class RadarManager {
   private engine: Engine;
@@ -37,7 +38,7 @@ class RadarManager {
   private updateRadars() {
     this.engine.getRadars().forEach((radar) => {
       radar.setFlightObjects(this.engine.getFlightObjects());
-      this.notifyRadarSubscribers(radar);
+      this.notifyRadarSubscribers(radar as SearchRadar | SectorRadar);
     });
   }
 
@@ -45,10 +46,10 @@ class RadarManager {
     return this.engine.getRadars().find((entity) => entity.id === radarId);
   }
 
-  private notifyRadarSubscribers(radar: Radar) {
+  private notifyRadarSubscribers(radar: SearchRadar | SectorRadar) {
     const callbacks = this.radarUpdateCallbacks.get(radar.id);
     if (callbacks) {
-      callbacks.forEach((callback) => callback(radar));
+      callbacks.forEach((callback) => callback(radar.getState()));
     }
   }
 }

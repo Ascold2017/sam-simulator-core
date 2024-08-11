@@ -11,15 +11,12 @@ export class EngineGUIManager {
 
   private setupGUI() {
     const engineFolder = this.gui.addFolder("Engine Controls");
-    engineFolder.add(this.core.engine, "start").name("Start Engine");
-    engineFolder.add(this.core.engine, "stop").name("Stop Engine");
+    engineFolder.add(this.core, 'startEngine').name("Start Engine");
+    engineFolder.add(this.core, "stopEngine").name("Stop Engine");
 
     // Добавление ползунка для управления timeScale
-    engineFolder.add(this.core.engine, 'timeScale', 0.1, 3)
+    engineFolder.add(this.core, 'engineTimeScale', 0.1, 3)
       .name('Time Scale')
-      .onChange((value: number) => {
-        this.core.engine.setTimeScale(value);
-      })
       .listen();
 
     engineFolder.open();

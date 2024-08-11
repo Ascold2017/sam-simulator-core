@@ -1,12 +1,10 @@
 import FlightObject from '../core/FlightObject';
 import * as CANNON from "cannon-es";
 
-class ActiveMissile extends FlightObject {
-  searchAngle: number;
+class Bullet extends FlightObject {
 
-  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3, searchAngle: number) {
+  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3) {
     super(id, body, velocity);
-    this.searchAngle = searchAngle;
   }
 
   update(deltaTime: number) {
@@ -16,4 +14,4 @@ class ActiveMissile extends FlightObject {
 
 }
 
-export default ActiveMissile;
+export default Bullet;

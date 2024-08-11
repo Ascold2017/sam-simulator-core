@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import SearchRadar from "../app/radars/SearchRadar";
 import { Camera } from "three";
+import { RadarDTO } from "../app";
 
 export class RadarDisplay {
     private display: THREE.Mesh;
@@ -8,7 +8,7 @@ export class RadarDisplay {
     private context: CanvasRenderingContext2D;
 
     constructor(
-        private radar: SearchRadar,
+        private radar: RadarDTO,
         private scene: THREE.Scene,
         private camera: Camera,
     ) {
@@ -20,7 +20,8 @@ export class RadarDisplay {
         this.scene.add(this.overlay);
     }
 
-    update() {
+    update(radar: RadarDTO) {
+        this.radar = radar;
         // Обновление положения дисплея и его наложения
         this.display.lookAt(this.camera.position);
         this.overlay.lookAt(this.camera.position);
@@ -137,7 +138,8 @@ export class RadarDisplay {
         this.drawAzimuthLabels(this.context, size);
 
         // Отображение целей
-        this.radar.getState().detectedFlightObjects.forEach((obj) => {
+        this.radar.detectedFlightObjects.forEach((obj) => {
+            
             const azimuth = obj.azimuth;
             const distance = obj.distance;
 

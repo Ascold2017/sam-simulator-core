@@ -17,7 +17,7 @@ import TargetManager from "./TargetManager";
 import { RadarConstructor } from "../core/Radar";
 
 class MissionManager {
-  engine: Engine;
+  private engine: Engine;
   private targetManager: TargetManager;
 
   constructor(engine: Engine) {

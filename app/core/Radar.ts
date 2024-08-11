@@ -3,6 +3,7 @@ import * as CANNON from "cannon-es";
 import FlightObject from "./FlightObject";
 import { Position } from "../types";
 import HeightmapTerrain from "./HeightmapTerrain";
+import RadarObject from "../radars/RadarObject";
 
 export interface RadarConstructor {
   id: string;
@@ -19,6 +20,7 @@ class Radar extends Entity {
   protected flightObjects: FlightObject[] = [];
   private ground: HeightmapTerrain;
   isEnabled: boolean = false;
+  protected detectedFlightObjects: RadarObject[];
 
   constructor(
     { id, position, minElevationAngle, maxElevationAngle, detectionRange, heightmapTerrain }:
@@ -34,6 +36,7 @@ class Radar extends Entity {
     this.minElevationAngle = minElevationAngle;
     this.maxElevationAngle = maxElevationAngle;
     this.detectionRange = detectionRange;
+    this.detectedFlightObjects = []
   }
 
   setFlightObjects(flightObjects: FlightObject[]) {
@@ -52,6 +55,12 @@ class Radar extends Entity {
 
   protected scan(deltaTime: number) {
     // FOR OVERRIDE
+  }
+
+  getState() {
+    return {
+      detectedFlightObjects: this.detectedFlightObjects
+    }
   }
 
   update(deltaTime: number): void {

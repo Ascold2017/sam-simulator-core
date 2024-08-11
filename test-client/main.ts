@@ -14,7 +14,7 @@ class TestClient {
     this.core = new Core();
 
     // Инициализация миссии
-    this.initializeMission();
+    this.core.startMission(missionData);
 
     // Инициализация сцены
     this.sceneInitializer = new SceneInitializer(this.core);
@@ -28,27 +28,20 @@ class TestClient {
       this.sceneInitializer.scene,
       this.sceneInitializer.camera,
     );
-
     // Подписка на обновление движка
-    this.core.engine.addEventListener("update", () => {
-      this.sceneInitializer.updateFlightObjects()
-     
-  });
+    this.core.updateListener = () => {
+      this.sceneInitializer.updateFlightObjects();
+    };
 
     // Запуск рендер-цикла
     this.animate();
-  }
-
-  // Инициализация миссии
-  private initializeMission() {
-    this.core.missionManager.createEntities(missionData);
   }
 
   // Рендер-цикл
   private animate() {
     requestAnimationFrame(() => this.animate());
 
-    this.sceneInitializer.updateScene()
+    this.sceneInitializer.updateScene();
     this.radarGUIManager.update();
   }
 }

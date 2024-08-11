@@ -1,14 +1,8 @@
 import * as THREE from "three";
 // @ts-ignore
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Core } from "../app/index";
-import { Heightfield } from "cannon-es";
-import FlightObject from "../app/core/FlightObject";
-import Radar from "../app/core/Radar";
-import HeightmapTerrain from "../app/core/HeightmapTerrain";
+import { Core, FlightObjectDTO, RadarDTO, HeightmapTerrainDTO, SectorRadarState, SearchRadarState } from "../app/index";
 import Camera from "../app/core/Camera";
-import SearchRadar from "../app/radars/SearchRadar";
-import SectorRadar from "../app/radars/SectorRadar";
 
 export class SceneInitializer {
     scene: THREE.Scene;
@@ -86,7 +80,7 @@ export class SceneInitializer {
     }
 
     private addFlightObjects() {
-        const flightObjects = this.core.engine.getFlightObjects();
+        const flightObjects = this.core.getFlightObjects();
         flightObjects.forEach((flightObject: any) => {
             const mesh = this.createMeshForFlightObject(flightObject);
             this.scene.add(mesh);
@@ -95,18 +89,18 @@ export class SceneInitializer {
     }
 
     private addRadars() {
-        const radars = this.core.engine.getRadars();
-        radars.forEach((radar: any) => {
+        const radars = this.core.getRadars();
+        radars.forEach((radar) => {
             const mesh = this.createMeshForRadar(radar);
             this.scene.add(mesh);
 
             // Добавляем визуализацию лучей для SearchRadar
-            if (radar instanceof SearchRadar) {
+            if (radar.type === 'search-radar') {
                 const beamMesh = this.createBeamForSearchRadar(radar);
                 this.scene.add(beamMesh);
             }
             // Добавляем визуализацию лучей для SectorRadar
-            if (radar instanceof SectorRadar) {
+            if (radar.type === 'sector-radar') {
                 const beamMesh = this.createBeamForSectorRadar(radar);
                 this.scene.add(beamMesh);
             }
@@ -114,7 +108,7 @@ export class SceneInitializer {
     }
 
     private addCameras() {
-        const cameras = this.core.engine.getCameras();
+        const cameras = this.core.getCameras();
         cameras.forEach((camera: any) => {
             const mesh = this.createMeshForCamera(camera);
             this.scene.add(mesh);
@@ -122,33 +116,33 @@ export class SceneInitializer {
     }
 
     private addHeightmapTerrain() {
-        const terrain = this.core.engine.getHeightmapTerrain();
+        const terrain = this.core.getHeightmapTerrain();
         if (!terrain) return;
         const mesh = this.createMeshForTerrain(terrain);
         this.scene.add(mesh);
     }
 
-    private createMeshForFlightObject(flightObject: FlightObject): THREE.Mesh {
+    private createMeshForFlightObject(flightObject: FlightObjectDTO): THREE.Mesh {
         const geometry = new THREE.SphereGeometry(10, 32, 32);
         const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(
-            flightObject.body.position.x,
-            flightObject.body.position.y,
-            flightObject.body.position.z,
+            flightObject.position.x,
+            flightObject.position.y,
+            flightObject.position.z,
         );
         mesh.name = flightObject.id;
         return mesh;
     }
 
-    private createMeshForRadar(radar: Radar): THREE.Mesh {
+    private createMeshForRadar(radar: RadarDTO): THREE.Mesh {
         const geometry = new THREE.ConeGeometry(2, 5, 32);
         const material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(
-            radar.body.position.x,
-            radar.body.position.y,
-            radar.body.position.z,
+            radar.position.x,
+            radar.position.y,
+            radar.position.z,
         );
         mesh.rotation.x = Math.PI / 2;
         mesh.name = radar.id;
@@ -156,8 +150,8 @@ export class SceneInitializer {
         return mesh;
     }
 
-    private createBeamForSearchRadar(radar: SearchRadar): THREE.Mesh {
-        const { detectionRange, minElevationAngle, maxElevationAngle, body } =
+    private createBeamForSearchRadar(radar: RadarDTO): THREE.Mesh {
+        const { detectionRange, minElevationAngle, maxElevationAngle, position } =
             radar;
         const angle = Math.PI / 60;
 
@@ -222,27 +216,28 @@ export class SceneInitializer {
 
         const mesh = new THREE.Mesh(beamGeometry, material);
 
-        mesh.position.set(body.position.x, body.position.y, body.position.z);
+        mesh.position.set(position.x, position.y, position.z);
 
         // Подписка на обновление sweepAngle для вращения пирамиды
-        this.core.radarManager.subscribeToRadarUpdates(radar.id, () => {
+        this.core.radarManager.subscribeToRadarUpdates(radar.id, (radarState) => {
+            const { sweepAngle } = radarState as SearchRadarState
             // Сначала вращаем пирамиду вокруг оси Z на sweepAngle
-            mesh.rotation.set(0, 0, radar.getState().sweepAngle);
+            mesh.rotation.set(0, 0, sweepAngle);
         });
 
         return mesh;
     }
 
-    private createBeamForSectorRadar(radar: SectorRadar): THREE.Group {
+    private createBeamForSectorRadar(radar: RadarDTO): THREE.Group {
         const {
             detectionRange,
             viewAngle,
-            body,
+            position,
         } = radar;
 
         // Создаем геометрию конуса
         const geometry = new THREE.ConeGeometry(
-            detectionRange * Math.tan(viewAngle / 2),
+            detectionRange * Math.tan(viewAngle! / 2),
             detectionRange,
             32,
         );
@@ -262,12 +257,12 @@ export class SceneInitializer {
 
         // Создаем группу для вращения вокруг вершины
         const pivot = new THREE.Group();
-        pivot.position.set(body.position.x, body.position.y, body.position.z);
+        pivot.position.set(position.x, position.y, position.z);
         pivot.add(cone);
 
         // Подписка на обновление sweepAngle для вращения пирамиды
-        this.core.radarManager.subscribeToRadarUpdates(radar.id, () => {
-            const { azimuthAngle, elevationAngle } = radar.getState();
+        this.core.radarManager.subscribeToRadarUpdates(radar.id, (radarState) => {
+            const { azimuthAngle, elevationAngle } = radarState as SectorRadarState;
 
             // Создаем кватернионы для азимута и возвышения
             const azimuthQuaternion = new THREE.Quaternion().setFromAxisAngle(
@@ -303,9 +298,8 @@ export class SceneInitializer {
         return mesh;
     }
 
-    private createMeshForTerrain(terrain: HeightmapTerrain): THREE.Mesh {
-        const shape = terrain.body.shapes[0] as unknown as Heightfield;
-        const { data, elementSize } = shape;
+    private createMeshForTerrain(terrain: HeightmapTerrainDTO): THREE.Mesh {
+        const { data, elementSize } = terrain;
 
         const terrainGeometry = new THREE.PlaneGeometry(
             elementSize * (data.length - 1),
@@ -336,7 +330,7 @@ export class SceneInitializer {
     }
 
     public updateFlightObjects() {
-        const flightObjects = this.core.engine.getFlightObjects();
+        const flightObjects = this.core.getFlightObjects();
         const existingMeshes = this.scene.children.filter(
             (obj) => this.currentFlightObjects.has(obj.name),
         );
@@ -349,9 +343,9 @@ export class SceneInitializer {
                 this.currentFlightObjects.add(flightObject.id);
             } else {
                 mesh.position.set(
-                    flightObject.body.position.x,
-                    flightObject.body.position.y,
-                    flightObject.body.position.z,
+                    flightObject.position.x,
+                    flightObject.position.y,
+                    flightObject.position.z,
                 );
             }
         });

@@ -10,7 +10,6 @@ interface SectorRadarConstructor extends RadarConstructor {
 class SectorRadar extends Radar {
   elevationAngle: number;
   azimuthAngle: number;
-  private detectedFlightObjects: RadarObject[];
   viewAngle: number;
 
   constructor({ viewAngle, ...radarParams }: SectorRadarConstructor) {
@@ -18,7 +17,6 @@ class SectorRadar extends Radar {
     this.azimuthAngle = 0;
     this.elevationAngle = 0;
     this.viewAngle = viewAngle;
-    this.detectedFlightObjects = [];
   }
 
   // Метод для установки текущих углов азимута и возвышения
