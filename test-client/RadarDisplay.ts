@@ -22,10 +22,6 @@ export class RadarDisplay {
 
     update(radar: RadarDTO) {
         this.radar = radar;
-        // Обновление положения дисплея и его наложения
-        this.display.lookAt(this.camera.position);
-        this.overlay.lookAt(this.camera.position);
-
         // Обновление целей на дисплее
         this.updateRadarOverlay();
     }
@@ -39,7 +35,7 @@ export class RadarDisplay {
 
         // Позиционирование дисплея
         display.position.set(-50, -50, 50); // Примерное положение
-        display.lookAt(this.camera.position); // Направляем дисплей в камеру
+        display.rotation.set(Math.PI/2, 0, 0)
 
         return display;
     }
@@ -124,8 +120,7 @@ export class RadarDisplay {
         const overlayMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
         const overlay = new THREE.Mesh(this.display.geometry.clone(), overlayMaterial);
         overlay.position.copy(this.display.position);
-        overlay.lookAt(this.camera.position);
-
+        overlay.rotation.copy(this.display.rotation)
         return overlay;
     }
 
