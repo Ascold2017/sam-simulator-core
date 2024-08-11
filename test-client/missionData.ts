@@ -155,7 +155,7 @@ export const missionData: MissionData = {
       {
         id: "search-radar-0",
         type: "search",
-        position: { x: 5, y: 10, z: 5 },
+        position: { x: 5, y: 10, z: 15 },
         minElevationAngle: 0,
         maxElevationAngle: Math.PI / 4,
         maxDistance: 5000,

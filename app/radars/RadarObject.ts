@@ -7,6 +7,12 @@ class RadarObject {
   private flightObject: FlightObject;
   private radar: Radar;
   private minimalSignalVolume: number;
+  azimuth: number;
+  elevation: number;
+  param: number;
+  distance: number;
+  radialVelocity: number;
+  isDetected: boolean;
   signalVolume: number;
   rcs: number
   
@@ -17,48 +23,21 @@ class RadarObject {
     this.rcs = this.calculateRCS();
     this.minimalSignalVolume = this.calculateMinimalSignalVolume();
     this.signalVolume = this.calculateSignalVolume();
+    const directionToObject = this.directionToRadar();
+    const distance = directionToObject.length();
+    this.azimuth = this.normalizeAngleTo2Pi(Math.atan2(directionToObject.y, directionToObject.x));
+    this.elevation = Math.asin(directionToObject.z / distance);
+    this.distance = distance;
+    // Параметрическое расстояние (расстояние в плоскости x-y) до радара
+    this.param = Math.sqrt(directionToObject.x ** 2 + directionToObject.y ** 2);
+    // Радиальная скорость относительно радара
+    // directionToObject.normalize();
+    this.radialVelocity = this.flightObject.velocity.dot(directionToObject);
+    this.isDetected = this.signalVolume >= this.minimalSignalVolume;
   }
 
   get id() {
     return this.flightObject.id
-  }
-
-  // Азимут относительно радара
-  get azimuth(): number {
-    const directionToObject = this.directionToRadar();
-    return this.normalizeAngleTo2Pi(Math.atan2(directionToObject.y, directionToObject.x));
-  }
-
-  // Угол возвышения относительно радара
-  get elevation(): number {
-    const directionToObject = this.directionToRadar();
-    const distance = directionToObject.length();
-    return Math.asin(directionToObject.z / distance);
-  }
-
-  // Параметрическое расстояние (расстояние в плоскости x-y) до радара
-  get param(): number {
-    const directionToObject = this.directionToRadar();
-    return Math.sqrt(directionToObject.x ** 2 + directionToObject.y ** 2);
-  }
-
-  get distance(): number {
-    const directionToObject = this.directionToRadar();
-    const distance = directionToObject.length();
-    return distance;
-  }
-
-  // Радиальная скорость относительно радара
-  get radialVelocity(): number {
-    const relativeVelocity = this.flightObject.velocity;
-    const directionToObject = this.directionToRadar();
-    directionToObject.normalize();
-    return relativeVelocity.dot(directionToObject);
-  }
-
-   // Свойство isDetected
-   get isDetected(): boolean {
-    return this.signalVolume >= this.minimalSignalVolume;
   }
 
   private directionToRadar(): CANNON.Vec3 {
