@@ -1,7 +1,14 @@
 import * as THREE from "three";
 // @ts-ignore
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Core, FlightObjectDTO, RadarDTO, HeightmapTerrainDTO, SectorRadarState, SearchRadarState } from "../app/index";
+import {
+    Core,
+    FlightObjectDTO,
+    HeightmapTerrainDTO,
+    RadarDTO,
+    SearchRadarState,
+    SectorRadarState,
+} from "../app/index";
 import Camera from "../app/core/Camera";
 
 export class SceneInitializer {
@@ -10,6 +17,7 @@ export class SceneInitializer {
     private renderer: THREE.WebGLRenderer;
     private controls: OrbitControls;
     private currentFlightObjects: Set<string> = new Set();
+    private smokeParticles: Map<string, THREE.Points> = new Map();
 
     constructor(private core: Core) {
         // Создание сцены
@@ -28,8 +36,7 @@ export class SceneInitializer {
             10000,
         );
         this.camera.position.set(100, -100, 100);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0))
-        
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         // Настройка рендерера
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -52,6 +59,7 @@ export class SceneInitializer {
     updateScene() {
         this.renderer.render(this.scene, this.camera);
         this.controls.update();
+        this.updateSmokeTrails();
     }
 
     // Добавление освещения на сцену
@@ -95,12 +103,12 @@ export class SceneInitializer {
             this.scene.add(mesh);
 
             // Добавляем визуализацию лучей для SearchRadar
-            if (radar.type === 'search-radar') {
+            if (radar.type === "search-radar") {
                 const beamMesh = this.createBeamForSearchRadar(radar);
                 this.scene.add(beamMesh);
             }
             // Добавляем визуализацию лучей для SectorRadar
-            if (radar.type === 'sector-radar') {
+            if (radar.type === "sector-radar") {
                 const beamMesh = this.createBeamForSectorRadar(radar);
                 this.scene.add(beamMesh);
             }
@@ -122,9 +130,31 @@ export class SceneInitializer {
         this.scene.add(mesh);
     }
 
-    private createMeshForFlightObject(flightObject: FlightObjectDTO): THREE.Mesh {
-        const geometry = new THREE.SphereGeometry(10, 32, 32);
-        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    private createMeshForFlightObject(
+        flightObject: FlightObjectDTO,
+    ): THREE.Mesh {
+        let geometry: THREE.BufferGeometry;
+        let material: THREE.MeshStandardMaterial;
+
+        switch (flightObject.type) {
+            case "target":
+                geometry = new THREE.SphereGeometry(5, 32, 32); // Красный шар для цели
+                material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+                break;
+            case "active-missile":
+                geometry = new THREE.CylinderGeometry(2, 2, 10, 32); // Зеленый цилиндр для ракеты
+                material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+                break;
+            case "bullet":
+                geometry = new THREE.SphereGeometry(2, 32, 32); // Желтый шарик для пули
+                material = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+                break;
+            default:
+                geometry = new THREE.BoxGeometry(5, 5, 5); // На случай неизвестного типа
+                material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+                break;
+        }
+        // Apply position
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(
             flightObject.position.x,
@@ -132,6 +162,23 @@ export class SceneInitializer {
             flightObject.position.z,
         );
         mesh.name = flightObject.id;
+        // Apply rotation
+        const velocity = new THREE.Vector3(
+            flightObject.velocity.x,
+            flightObject.velocity.y,
+            flightObject.velocity.z,
+        );
+        velocity.normalize();
+
+        const axis = new THREE.Vector3(0, 1, 0);
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(
+            axis,
+            velocity,
+        );
+        mesh.quaternion.copy(quaternion);
+
+        this.addSmokeTrail(flightObject.id, mesh);
+
         return mesh;
     }
 
@@ -151,8 +198,12 @@ export class SceneInitializer {
     }
 
     private createBeamForSearchRadar(radar: RadarDTO): THREE.Mesh {
-        const { detectionRange, minElevationAngle, maxElevationAngle, position } =
-            radar;
+        const {
+            detectionRange,
+            minElevationAngle,
+            maxElevationAngle,
+            position,
+        } = radar;
         const angle = Math.PI / 60;
 
         // Создаем вершины пирамиды, корректируя ориентацию
@@ -219,11 +270,14 @@ export class SceneInitializer {
         mesh.position.set(position.x, position.y, position.z);
 
         // Подписка на обновление sweepAngle для вращения пирамиды
-        this.core.radarManager.subscribeToRadarUpdates(radar.id, (radarState) => {
-            const { sweepAngle } = radarState as SearchRadarState
-            // Сначала вращаем пирамиду вокруг оси Z на sweepAngle
-            mesh.rotation.set(0, 0, sweepAngle);
-        });
+        this.core.radarManager.subscribeToRadarUpdates(
+            radar.id,
+            (radarState) => {
+                const { sweepAngle } = radarState as SearchRadarState;
+                // Сначала вращаем пирамиду вокруг оси Z на sweepAngle
+                mesh.rotation.set(0, 0, sweepAngle);
+            },
+        );
 
         return mesh;
     }
@@ -261,25 +315,31 @@ export class SceneInitializer {
         pivot.add(cone);
 
         // Подписка на обновление sweepAngle для вращения пирамиды
-        this.core.radarManager.subscribeToRadarUpdates(radar.id, (radarState) => {
-            const { azimuthAngle, elevationAngle } = radarState as SectorRadarState;
+        this.core.radarManager.subscribeToRadarUpdates(
+            radar.id,
+            (radarState) => {
+                const { azimuthAngle, elevationAngle } =
+                    radarState as SectorRadarState;
 
-            // Создаем кватернионы для азимута и возвышения
-            const azimuthQuaternion = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(0, 0, 1), // Вращаем вокруг оси Y
-                azimuthAngle,
-            );
+                // Создаем кватернионы для азимута и возвышения
+                const azimuthQuaternion = new THREE.Quaternion()
+                    .setFromAxisAngle(
+                        new THREE.Vector3(0, 0, 1), // Вращаем вокруг оси Y
+                        azimuthAngle,
+                    );
 
-            const elevationQuaternion = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(0, -1, 0), // Вращаем вокруг оси X
-                elevationAngle,
-            );
+                const elevationQuaternion = new THREE.Quaternion()
+                    .setFromAxisAngle(
+                        new THREE.Vector3(0, -1, 0), // Вращаем вокруг оси X
+                        elevationAngle,
+                    );
 
-            // Применяем оба вращения
-            pivot.quaternion.copy(azimuthQuaternion).multiply(
-                elevationQuaternion,
-            );
-        });
+                // Применяем оба вращения
+                pivot.quaternion.copy(azimuthQuaternion).multiply(
+                    elevationQuaternion,
+                );
+            },
+        );
 
         return pivot;
     }
@@ -329,6 +389,47 @@ export class SceneInitializer {
         return mesh;
     }
 
+    private addSmokeTrail(missileId: string, missileMesh: THREE.Mesh) {
+        const particleCount = 100;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0x555555,
+            size: 10,
+            transparent: true,
+            opacity: 0.7,
+        });
+
+        const smokeTrail = new THREE.Points(particlesGeometry, particlesMaterial);
+        smokeTrail.userData = { missileMesh, lastPosition: new THREE.Vector3() };
+        this.scene.add(smokeTrail);
+        this.smokeParticles.set(missileId, smokeTrail);
+    }
+
+    private updateSmokeTrails() {
+        this.smokeParticles.forEach((smokeTrail) => {
+            const { missileMesh, lastPosition } = smokeTrail.userData;
+            const positions = smokeTrail.geometry.attributes.position.array;
+
+            lastPosition.copy(missileMesh.position);
+
+            for (let i = positions.length - 3; i > 0; i -= 3) {
+                positions[i] = positions[i - 3];
+                positions[i + 1] = positions[i - 2];
+                positions[i + 2] = positions[i - 1];
+            }
+
+            positions[0] = missileMesh.position.x;
+            positions[1] = missileMesh.position.y;
+            positions[2] = missileMesh.position.z;
+
+            smokeTrail.geometry.attributes.position.needsUpdate = true;
+        });
+    }
+
+
     public updateFlightObjects() {
         const flightObjects = this.core.getFlightObjects();
         const existingMeshes = this.scene.children.filter(
@@ -347,6 +448,18 @@ export class SceneInitializer {
                     flightObject.position.y,
                     flightObject.position.z,
                 );
+                const velocity = new THREE.Vector3(
+                    flightObject.velocity.x,
+                    flightObject.velocity.y,
+                    flightObject.velocity.z,
+                );
+                velocity.normalize();
+                const axis = new THREE.Vector3(0, 1, 0);
+                const quaternion = new THREE.Quaternion().setFromUnitVectors(
+                    axis,
+                    velocity,
+                );
+                mesh.quaternion.copy(quaternion);
             }
         });
 

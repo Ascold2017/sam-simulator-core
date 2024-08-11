@@ -8,6 +8,7 @@ export class FlightObjectDTO {
     id: string;
     isKilled: boolean;
     position: Position;
+    velocity: Position;
     type: 'target' | 'active-missile' | 'bullet' | 'unknown';
     constructor(flightObject: FlightObject) {
         this.id = flightObject.id;
@@ -16,6 +17,11 @@ export class FlightObjectDTO {
             x: flightObject.body.position.x,
             y: flightObject.body.position.y,
             z: flightObject.body.position.z
+        }
+        this.velocity = {
+            x: flightObject.body.velocity.x,
+            y: flightObject.body.velocity.y,
+            z: flightObject.body.velocity.z
         }
         this.type = (() => {
             if (flightObject instanceof TargetObject) return 'target'
