@@ -6,9 +6,9 @@ import MissionManager from "./managers/MissionManager";
 import RadarManager from "./managers/RadarManager";
 import TargetManager from "./managers/TargetManager";
 import WeaponManager from "./managers/WeaponManager";
-import { MissionData } from "./types.d";
+import { MissionData } from "./types";
 
-export * from './types.d'
+export * from './types'
 
 export type { FlightObjectDTO, RadarDTO, HeightmapTerrainDTO, SearchRadarState, SectorRadarState };
 export class Core {
