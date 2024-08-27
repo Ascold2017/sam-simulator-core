@@ -15,6 +15,7 @@ class SearchRadar extends Radar {
 
   getState() {
     return {
+      type: 'search',
       detectedFlightObjects: this.detectedFlightObjects,
       sweepAngle: this.sweepAngle,
     };

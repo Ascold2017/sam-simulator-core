@@ -68,6 +68,7 @@ class SectorRadar extends Radar {
   // Публичный метод для получения состояния радара
   getState() {
     return {
+      type: 'sector',
       detectedFlightObjects: this.detectedFlightObjects,
       azimuthAngle: this.azimuthAngle,
       elevationAngle: this.elevationAngle,
