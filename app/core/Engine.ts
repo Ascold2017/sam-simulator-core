@@ -53,6 +53,11 @@ class Engine {
     }
   }
 
+  removeAllEntities() {
+    this.entities.forEach((e) => this.removeEntity(e));
+    Object.keys(this.eventListeners).forEach((event) => event !== 'update' && this.removeEventListener(event));
+  }
+
   update(deltaTime: number) {
     this.world.step(deltaTime * this.timeScale);
     this.entities = this.entities.filter((e) => !e.isDestroyed);
@@ -95,6 +100,10 @@ class Engine {
       this.eventListeners[event] = [];
     }
     this.eventListeners[event].push(listener);
+  }
+
+  removeEventListener(event: string) {
+    delete this.eventListeners[event];
   }
 
   dispatchEvent(event: string, data?: any) {

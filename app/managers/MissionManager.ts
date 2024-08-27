@@ -32,6 +32,10 @@ class MissionManager {
     this.initCameras(missionData.cameras);
   }
 
+  clearEntities() {
+    this.engine.removeAllEntities();
+  }
+
   private initTerrain(mapData: MapData) {
     const terrain = new HeightmapTerrain(mapData.data, mapData.size);
     this.engine.addEntity(terrain);

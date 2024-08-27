@@ -48,6 +48,11 @@ export class Core {
         this.engine.start();
     }
 
+    stopMission() {
+        this.missionManager.clearEntities()
+        this.engine.stop()
+    }
+
     /// GETTERS ///
     getFlightObjects() {
         return this.engine.getFlightObjects().map(fo => new FlightObjectDTO(fo))
