@@ -11,7 +11,7 @@ class Engine {
   private entities: Entity[] = [];
   private eventListeners: { [key: string]: Function[] } = {};
   private lastUpdateTime: number = Date.now();
-  private isRunning: boolean = false;
+  isRunning: boolean = false;
   timeScale: number = 1; // Начальное значение timeScale
 
   constructor() {

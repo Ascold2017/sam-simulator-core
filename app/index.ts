@@ -26,6 +26,9 @@ export class Core {
     }
 
     /// ENGINE ///
+    get engineIsStarted() {
+        return !!this.engine.isRunning
+    }
     get engineTimeScale() {
         return this.engine.timeScale;
     }
