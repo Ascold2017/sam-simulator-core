@@ -17,33 +17,9 @@ export interface TargetData {
     waypoints: Waypoint[];
 }
 
-export interface RadarData {
-    id: string;
-    type: "search" | "sector";
-    position: Position;
-    minElevationAngle: number;
-    maxElevationAngle: number;
-    maxDistance: number;
-    sweepSpeed?: number;
-    azimuthAngle?: number;
-    viewAngle?: number;
-}
-
-export interface CameraData {
-    id: string;
-    type: "tv" | "thermal";
-    position: Position;
-    minElevationAngle: number;
-    maxElevationAngle: number;
-    azimuthAngle: number;
-    viewAngle: number;
-}
-
 export interface MissionData {
     map: MapData;
     targets: TargetData[];
-    radars: RadarData[];
-    cameras: CameraData[];
 }
 
 export interface Waypoint {

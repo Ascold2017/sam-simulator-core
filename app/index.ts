@@ -1,28 +1,24 @@
 import Engine from "./core/Engine";
 import { FlightObjectDTO } from "./dto/FlightObject.dto";
 import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
-import { RadarDTO, SearchRadarState, SectorRadarState } from "./dto/Radar.dto";
 import MissionManager from "./managers/MissionManager";
-import RadarManager from "./managers/RadarManager";
 import TargetManager from "./managers/TargetManager";
 import WeaponManager from "./managers/WeaponManager";
 import { MissionData } from "./types";
 
 export * from './types'
 
-export type { FlightObjectDTO, RadarDTO, HeightmapTerrainDTO, SearchRadarState, SectorRadarState };
+export type { FlightObjectDTO, HeightmapTerrainDTO };
 export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
-    private targetManager: TargetManager;
+    targetManager: TargetManager;
     weaponManager: WeaponManager
-    radarManager: RadarManager;
     updateListener: Function | null = null
     constructor() {
         this.engine = new Engine();
         this.missionManager = new MissionManager(this.engine)
         this.targetManager = new TargetManager(this.engine);
-        this.radarManager = new RadarManager(this.engine);
         this.weaponManager = new WeaponManager(this.engine)
         this.engine.addEventListener('update', () => {
             this.updateListener && this.updateListener()
@@ -63,13 +59,6 @@ export class Core {
         return entity && new HeightmapTerrainDTO(entity)
     }
 
-    getRadars() {
-        return this.engine.getRadars().map(radar => new RadarDTO(radar))
-    }
-
-    getCameras() {
-        return this.engine.getCameras()
-    }
 
     /// ///
 

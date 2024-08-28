@@ -151,37 +151,6 @@ export const missionData: MissionData = {
       },
       */
     ],
-    radars: [
-      {
-        id: "search-radar-0",
-        type: "search",
-        position: { x: 5, y: 10, z: 15 },
-        minElevationAngle: 0,
-        maxElevationAngle: Math.PI / 4,
-        maxDistance: 5000,
-        sweepSpeed: 0.5,
-      },
-      {
-        id: "sector-radar-0",
-        type: "sector",
-        position: { x: 5, y: 20, z: 5 },
-        minElevationAngle: 0,
-        maxElevationAngle: Math.PI / 6,
-        maxDistance: 4000,
-        viewAngle: Math.PI / 6,
-      },
-    ],
-    cameras: [
-      {
-        id: "tv-camera-1",
-        type: "tv",
-        position: { x: 2, y: 7, z: 7 },
-        minElevationAngle: -Math.PI / 6,
-        maxElevationAngle: Math.PI / 6,
-        azimuthAngle: Math.PI / 4,
-        viewAngle: Math.PI / 3,
-      },
-    ],
   };
 
   function generateTerrainMap(size: number): number[][] {

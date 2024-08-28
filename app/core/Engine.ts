@@ -1,8 +1,6 @@
 import * as CANNON from "cannon-es";
 import Entity from "./Entity";
 import FlightObject from "./FlightObject";
-import Radar from "./Radar";
-import Camera from "./Camera";
 import HeightmapTerrain from "./HeightmapTerrain";
 
 // Константа для частоты обновления (40 раз в секунду)
@@ -26,14 +24,6 @@ class Engine {
 
   getFlightObjects() {
     return this.entities.filter((e) => e instanceof FlightObject);
-  }
-
-  getRadars() {
-    return this.entities.filter((e) => e instanceof Radar);
-  }
-
-  getCameras() {
-    return this.entities.filter((e) => e instanceof Camera);
   }
 
   getHeightmapTerrain() {
