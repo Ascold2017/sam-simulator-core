@@ -53,8 +53,8 @@ class WeaponManager {
 
     // Подъем на 100 метров, после чего ракета направляется к точке перехвата
     if (!missile.isLaunched) {
-      if (missilePosition.z < 100) {
-        missile.velocity.set(0, 0, 100); // Вертикальный подъем
+      if (missilePosition.y < 100) {
+        missile.velocity.set(0, 100, 0); // Вертикальный подъем
         return;
       }
       missile.isLaunched = true;

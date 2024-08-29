@@ -10,7 +10,7 @@ class FlightObject extends Entity {
     super(id, body);
     this.velocity = velocity;
     this.isKilled = false;
-    this.body.addEventListener('collide', () => this.onCollide())
+    this.body.addEventListener('collide', (e) => this.onCollide(e))
   }
 
   update(deltaTime: number) {
@@ -18,7 +18,7 @@ class FlightObject extends Entity {
     
     if (this.isKilled) {
       // Применяем гравитацию
-      const gravityCompensation = new CANNON.Vec3(0, 0, -this.body.mass * 9.81);
+      const gravityCompensation = new CANNON.Vec3(0, -this.body.mass * 9.81, 0);
       this.body.applyForce(gravityCompensation, this.body.position);
     } else {
       this.body.velocity = this.velocity;
@@ -30,8 +30,8 @@ class FlightObject extends Entity {
     this.isKilled = true;
   }
 
-  private onCollide() {
-    console.log('collide', this.id)
+  private onCollide(e) {
+    console.log('collide', this.id, this.body.position, e)
     this.destroy();
   }
 }
