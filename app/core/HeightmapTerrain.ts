@@ -12,6 +12,8 @@ class HeightmapTerrain extends Entity {
       })
     });
 
+    body.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+
     super('heightmap', body);
   }
 }

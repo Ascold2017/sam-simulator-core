@@ -10,7 +10,7 @@ class FlightObject extends Entity {
     super(id, body);
     this.velocity = velocity;
     this.isKilled = false;
-    this.body.addEventListener('collide', (e) => this.onCollide(e))
+    this.body.addEventListener('collide', () => this.onCollide())
   }
 
   update(deltaTime: number) {
@@ -30,8 +30,8 @@ class FlightObject extends Entity {
     this.isKilled = true;
   }
 
-  private onCollide(e) {
-    console.log('collide', this.id, this.body.position, e)
+  private onCollide() {
+    console.log('collide', this.id)
     this.destroy();
   }
 }

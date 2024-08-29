@@ -4,7 +4,8 @@ import HeightmapTerrain from "../core/HeightmapTerrain";
 export class HeightmapTerrainDTO {
     id: string;
     data: number[][]
-    elementSize: number
+    elementSize: number;
+    
     constructor(heightmapTerrain: HeightmapTerrain) {
         this.id = heightmapTerrain.id;
         const shape = heightmapTerrain.body.shapes[0] as Heightfield;

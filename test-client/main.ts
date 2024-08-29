@@ -1,7 +1,6 @@
 import { Core, MissionData } from "../app/index";
 import { SceneInitializer } from "./SceneInitializer";
 import { EngineGUIManager } from "./EngineGUIManager";
-import { RadarGUIManager } from "./RadarGUIManager";
 import { missionData } from "./missionData";
 import { weaponGUIManager } from "./WeaponGUIManager";
 
@@ -9,7 +8,6 @@ class TestClient {
   private core: Core;
   private sceneInitializer: SceneInitializer;
   private engineGUIManager: EngineGUIManager;
-  private radarGUIManager: RadarGUIManager;
   private weaponGUIManager: weaponGUIManager;
 
   constructor() {
@@ -24,12 +22,6 @@ class TestClient {
     // Инициализация GUI для управления движком
     this.engineGUIManager = new EngineGUIManager(this.core);
 
-    // Инициализация GUI для радаров
-    this.radarGUIManager = new RadarGUIManager(
-      this.core,
-      this.sceneInitializer.scene,
-      this.sceneInitializer.camera,
-    );
 
     this.weaponGUIManager = new weaponGUIManager(this.core)
     // Подписка на обновление движка
@@ -46,7 +38,6 @@ class TestClient {
     requestAnimationFrame(() => this.animate());
 
     this.sceneInitializer.updateScene();
-    this.radarGUIManager.update();
   }
 }
 

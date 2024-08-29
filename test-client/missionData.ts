@@ -12,15 +12,8 @@ export const missionData: MissionData = {
         temperature: 50,
         size: 2,
         waypoints: [
-          { position: { x: 0, y: 0, z: 100 }, speed: 200 },
-          { position: { x: 200, y: -100, z: 100 }, speed: 170 },
-          { position: { x: 400, y: 100, z: 100 }, speed: 170 },
-          { position: { x: 600, y: -200, z: 100 }, speed: 170 },
-          { position: { x: 800, y: 0, z: 100 }, speed: 170 },
-          { position: { x: 1000, y: -300, z: 100 }, speed: 170 },
-          { position: { x: 1200, y: 300, z: 100 }, speed: 170 },
-          { position: { x: 1500, y: 0, z: 100 }, speed: 170 },
-          { position: { x: 2000, y: 1000, z: 100 }, speed: 150 },
+          { position: { x: 0, y: 150, z: 0 }, speed: 250 },
+          { position: { x: 10000, y: 150, z: -10000 }, speed: 170 },
         ],
       },
       /*

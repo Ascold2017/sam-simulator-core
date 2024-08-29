@@ -21,7 +21,6 @@ export class SceneInitializer {
         this.scene.background = new THREE.Color(0x87CEEB); // Светло-голубой цвет
 
         const gridHelper = new THREE.GridHelper(1000);
-        gridHelper.rotation.x = Math.PI / 2;
         this.scene.add(gridHelper);
 
         // Создание камеры
@@ -31,8 +30,7 @@ export class SceneInitializer {
             0.1,
             10000,
         );
-        this.camera.position.set(0, -500, 300);
-        this.camera.up.set(0, 0, 1);
+        this.camera.position.set(0, 300, -500);
         this.camera.lookAt(0, 0, 0);
 
         // Настройка рендерера
@@ -45,7 +43,7 @@ export class SceneInitializer {
             this.camera,
             this.renderer.domElement,
         );
-        this.controls.listenToKeyEvents( window );
+        this.controls.listenToKeyEvents(window);
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
         this.controls.dampingFactor = 0.05;
 
@@ -75,7 +73,7 @@ export class SceneInitializer {
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(50, 50, 500).normalize();
+        directionalLight.position.set(50, 500, 50).normalize();
         directionalLight.lookAt(0, 0, 0);
         this.scene.add(directionalLight);
 
@@ -161,25 +159,28 @@ export class SceneInitializer {
         return mesh;
     }
 
-  
+
     private createMeshForTerrain(terrain: HeightmapTerrainDTO): THREE.Mesh {
         const { data, elementSize } = terrain;
 
+        const width = data.length;
+        const height = data[0].length;
         const terrainGeometry = new THREE.PlaneGeometry(
-            elementSize * (data.length - 1),
-            elementSize * (data[0].length - 1),
-            data.length - 1,
-            data[0].length - 1,
+            width * elementSize, // ширина плоскости
+            height * elementSize, // высота плоскости
+            width - 1, // количество сегментов по ширине
+            height - 1 // количество сегментов по высоте
         );
 
-        const positionAttribute = terrainGeometry.attributes.position;
-        for (let i = 0; i < positionAttribute.count; i++) {
-            const x = i % data.length;
-            const y = Math.floor(i / data.length);
-            positionAttribute.setZ(i, data[y][x]);
+        const positionAttribute = terrainGeometry.attributes.position.array;
+
+        for (let i = 0, j = 0; i < positionAttribute.length; i += 3, j++) {
+            const x = j % width;
+            const y = Math.floor(j / width);
+            positionAttribute[i + 2] = data[x][y]; // задаем высоту вершины (ось Z в Three.js)
         }
 
-        positionAttribute.needsUpdate = true;
+        terrainGeometry.attributes.position.needsUpdate = true;
         terrainGeometry.computeVertexNormals();
 
         const material = new THREE.MeshStandardMaterial({
@@ -188,6 +189,8 @@ export class SceneInitializer {
         });
 
         const mesh = new THREE.Mesh(terrainGeometry, material);
+
+        mesh.rotation.x = -Math.PI / 2;
 
         mesh.name = terrain.id;
         return mesh;
