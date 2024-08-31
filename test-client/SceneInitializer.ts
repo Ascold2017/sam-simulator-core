@@ -23,6 +23,9 @@ export class SceneInitializer {
         const gridHelper = new THREE.GridHelper(1000);
         this.scene.add(gridHelper);
 
+        const axisHelper = new THREE.AxesHelper(100)
+        this.scene.add(axisHelper)
+
         // Создание камеры
         this.camera = new THREE.PerspectiveCamera(
             75,
@@ -163,21 +166,26 @@ export class SceneInitializer {
     private createMeshForTerrain(terrain: HeightmapTerrainDTO): THREE.Mesh {
         const { data, elementSize } = terrain;
 
-        const width = data.length;
-        const height = data[0].length;
-        const terrainGeometry = new THREE.PlaneGeometry(
-            width * elementSize, // ширина плоскости
-            height * elementSize, // высота плоскости
-            width - 1, // количество сегментов по ширине
-            height - 1 // количество сегментов по высоте
-        );
+        // Создаем геометрию на основе матрицы высот
+        const width = (data.length - 1) * elementSize;
+        const height = (data[0].length - 1) * elementSize;
+        const terrainGeometry = new THREE.PlaneGeometry(width, height, data.length - 1, data[0].length - 1);
 
-        const positionAttribute = terrainGeometry.attributes.position.array;
 
-        for (let i = 0, j = 0; i < positionAttribute.length; i += 3, j++) {
-            const x = j % width;
-            const y = Math.floor(j / width);
-            positionAttribute[i + 2] = data[x][y]; // задаем высоту вершины (ось Z в Three.js)
+        // Модифицируем вершины геометрии на основе матрицы высот
+        for (let i = 0; i < data.length; i++) {
+            for (let j = 0; j < data[i].length; j++) {
+                const vertexIndex = i * data[i].length + j;
+                const heightValue = data[i][j];
+
+                // Устанавливаем высоту (Z) для каждой вершины
+                terrainGeometry.attributes.position.setZ(vertexIndex, heightValue);
+                // Устанавливаем позиции X и Y с учетом elementSize
+                const x = (j - (data[i].length - 1) / 2) * elementSize;
+                const y = (i - (data.length - 1) / 2) * elementSize;
+                terrainGeometry.attributes.position.setX(vertexIndex, x);
+                terrainGeometry.attributes.position.setY(vertexIndex, y);
+            }
         }
 
         terrainGeometry.attributes.position.needsUpdate = true;
@@ -185,13 +193,12 @@ export class SceneInitializer {
 
         const material = new THREE.MeshStandardMaterial({
             color: 0x0000ff,
-            wireframe: false,
+            side: THREE.BackSide
         });
 
         const mesh = new THREE.Mesh(terrainGeometry, material);
 
-        mesh.rotation.x = -Math.PI / 2;
-
+        mesh.rotation.x = -Math.PI / 2
         mesh.name = terrain.id;
         return mesh;
     }

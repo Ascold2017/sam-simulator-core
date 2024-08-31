@@ -12,38 +12,33 @@ export const missionData: MissionData = {
         temperature: 50,
         size: 2,
         waypoints: [
-          { position: { x: 0, y: 150, z: 0 }, speed: 250 },
-          { position: { x: 10000, y: 150, z: -10000 }, speed: 170 },
+          { position: { x: -500, y: 50, z: -500 }, speed: 100 },
+          { position: { x: 500, y: 50, z: -400 }, speed: 100 },
+          { position: { x: -500, y: 50, z: -300 }, speed: 100 },
+          { position: { x: 500, y: 50, z: -200 }, speed: 100 },
+          { position: { x: -500, y: 50, z: -100 }, speed: 100 },
+          { position: { x: 500, y: 50, z: 0 }, speed: 100 },
+          { position: { x: -500, y: 50, z: 100 }, speed: 100 },
+          { position: { x: 500, y: 50, z: 200 }, speed: 100 },
+          { position: { x: -500, y: 50, z: 300 }, speed: 100 },
+          { position: { x: 500, y: 50, z: 400 }, speed: 100 },
+          { position: { x: -500, y: 50, z: 500 }, speed: 100 },
+          
         ],
       },
-      /*
-      {
-        id: "target-2",
-        rcs: 0.6,
-        temperature: 55,
-        size: 2.5,
-        waypoints: [
-          { position: { x: -1000, y: -500, z: 150 }, speed: 180 },
-          { position: { x: -800, y: -300, z: 150 }, speed: 180 },
-          { position: { x: -600, y: -100, z: 150 }, speed: 180 },
-          { position: { x: -400, y: 100, z: 150 }, speed: 180 },
-          { position: { x: -200, y: 300, z: 150 }, speed: 180 },
-          { position: { x: 0, y: 500, z: 150 }, speed: 180 },
-        ],
-      },
+  
+      
       {
         id: "target-3",
         rcs: 0.7,
         temperature: 45,
         size: 3,
         waypoints: [
-          { position: { x: 500, y: 0, z: 200 }, speed: 160 },
-          { position: { x: 1000, y: 300, z: 200 }, speed: 160 },
-          { position: { x: 1500, y: 600, z: 200 }, speed: 160 },
-          { position: { x: 2000, y: 900, z: 200 }, speed: 160 },
-          { position: { x: 2500, y: 1200, z: 200 }, speed: 160 },
+          { position: { x: 0, y: 50, z: 0 }, speed: 160 },
+          { position: { x: 10000, y: 50, z: -10000 }, speed: 160 },
         ],
       },
+      /*
       {
         id: "target-4",
         rcs: 0.8,
