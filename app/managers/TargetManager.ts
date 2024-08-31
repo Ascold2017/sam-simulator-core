@@ -36,7 +36,6 @@ class TargetManager {
           nextWaypoint,
         );
       } else {
-        console.log('here')
         target.destroy();
       }
     };

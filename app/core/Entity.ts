@@ -18,7 +18,6 @@ class Entity {
   destroy() {
     // Mark as destroyed. Engine will remove this entity at nearby update
     this.isDestroyed = true;
-    console.log('destroyed')
   }
 }
 
