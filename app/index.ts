@@ -1,6 +1,8 @@
 import Engine from "./core/Engine";
+import { AAObjectDTO } from "./dto/AAObject.dto";
 import { FlightObjectDTO } from "./dto/FlightObject.dto";
 import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
+import AAManager from "./managers/AAManager";
 import MissionManager from "./managers/MissionManager";
 import TargetManager from "./managers/TargetManager";
 import WeaponManager from "./managers/WeaponManager";
@@ -13,13 +15,13 @@ export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
     private targetManager: TargetManager;
-    private weaponManager: WeaponManager
+    private aaManager: AAManager
     updateListener: Function | null = null
     constructor() {
         this.engine = new Engine();
         this.missionManager = new MissionManager(this.engine)
         this.targetManager = new TargetManager(this.engine);
-        this.weaponManager = new WeaponManager(this.engine)
+        this.aaManager = new AAManager(this.engine)
         this.engine.addEventListener('update', () => {
             this.updateListener && this.updateListener()
         })
@@ -62,10 +64,18 @@ export class Core {
         return entity && new HeightmapTerrainDTO(entity)
     }
 
+    getAAs() {
+        return this.engine.getAAs().map(aa => new AAObjectDTO(aa))
+    }
 
-    /// ///
-    launchMissile(targetId: string, missileSpeed: number, startPosition: Position) {
-        this.weaponManager.launchActiveMissile(targetId, missileSpeed, startPosition)
+
+    /// AA ///
+    captureTargetOnDirection(aaId: string, azimuth: number, elevation: number) {
+        this.aaManager.captureFlightObjectOnDirection(aaId, azimuth, elevation)
+    }
+
+    fire(aaId: string, azimuth: number, elevation: number) {
+        this.aaManager.fire(aaId, azimuth, elevation)
     }
 
 }

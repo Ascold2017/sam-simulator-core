@@ -17,9 +17,18 @@ export interface TargetData {
     waypoints: Waypoint[];
 }
 
+export interface AAData {
+    id: string;
+    position: Position;
+    type: 'active-missile' | 'gun',
+    ammoVelocity: number;
+    ammoMaxRange: number;
+}
+
 export interface MissionData {
     map: MapData;
     targets: TargetData[];
+    aas: AAData[]
 }
 
 export interface Waypoint {

@@ -1,7 +1,9 @@
+import { AAObject } from "../core/AAObject";
 import Engine from "../core/Engine";
 import HeightmapTerrain from "../core/HeightmapTerrain";
 import TargetObject from "../flightObjects/TargetObject";
 import {
+  AAData,
   MapData,
   MissionData,
   TargetData,
@@ -20,6 +22,7 @@ class MissionManager {
   createEntities(missionData: MissionData) {
     this.initTerrain(missionData.map);
     this.initTargets(missionData.targets);
+    this.initAAs(missionData.aas)
   }
 
   clearEntities() {
@@ -33,7 +36,7 @@ class MissionManager {
 
   private initTargets(targets: TargetData[]) {
     for (const targetData of targets) {
-      
+
       const target = new TargetObject({
         id: targetData.id,
         initialPosition: targetData.waypoints[0].position,
@@ -46,6 +49,23 @@ class MissionManager {
         targetId: targetData.id,
         waypoints: targetData.waypoints.slice(1),
       });
+    }
+  }
+
+  private initAAs(aas: AAData[]) {
+    for (const aa of aas) {
+
+      const aaObject = new AAObject(
+        aa.id,
+        {
+          type: aa.type,
+          position: aa.position,
+          ammoMaxRange: aa.ammoMaxRange,
+          ammoVelocity: aa.ammoVelocity,
+
+        });
+      this.engine.addEntity(aaObject);
+
     }
   }
 }

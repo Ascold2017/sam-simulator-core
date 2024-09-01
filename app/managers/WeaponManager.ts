@@ -2,7 +2,6 @@ import * as CANNON from "cannon-es";
 import { Position } from "../types";
 import Engine from "../core/Engine";
 import ActiveMissile from "../flightObjects/ActiveMissile";
-import FlightObject from "../core/FlightObject";
 
 class WeaponManager {
   private engine: Engine;
