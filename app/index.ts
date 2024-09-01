@@ -4,7 +4,7 @@ import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
 import MissionManager from "./managers/MissionManager";
 import TargetManager from "./managers/TargetManager";
 import WeaponManager from "./managers/WeaponManager";
-import { MissionData } from "./types";
+import { MissionData, Position } from "./types";
 
 export * from './types'
 
@@ -12,8 +12,8 @@ export type { FlightObjectDTO, HeightmapTerrainDTO };
 export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
-    targetManager: TargetManager;
-    weaponManager: WeaponManager
+    private targetManager: TargetManager;
+    private weaponManager: WeaponManager
     updateListener: Function | null = null
     constructor() {
         this.engine = new Engine();
@@ -64,5 +64,8 @@ export class Core {
 
 
     /// ///
+    launchMissile(targetId: string, missileSpeed: number, startPosition: Position) {
+        this.weaponManager.launchActiveMissile(targetId, missileSpeed, startPosition)
+    }
 
 }
