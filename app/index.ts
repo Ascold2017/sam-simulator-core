@@ -71,11 +71,11 @@ export class Core {
 
     /// AA ///
     captureTargetOnDirection(aaId: string, azimuth: number, elevation: number) {
-        this.aaManager.captureFlightObjectOnDirection(aaId, azimuth, elevation)
+        return this.aaManager.captureFlightObjectOnDirection(aaId, azimuth, elevation)
     }
 
     fire(aaId: string, azimuth: number, elevation: number) {
-        this.aaManager.fire(aaId, azimuth, elevation)
+        return this.aaManager.fire(aaId, azimuth, elevation)
     }
 
 }

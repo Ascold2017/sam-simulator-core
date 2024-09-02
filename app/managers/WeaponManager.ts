@@ -14,7 +14,7 @@ class WeaponManager {
     this.engine = engine;
   }
 
-  launchActiveMissile(targetId: string, speed: number, position: Position) {
+  launchActiveMissile(targetId: string, speed: number, position: Position, maxRange: number) {
     // 1. Находим flightObject по targetId
     const target = this.engine.getFlightObjects().find((obj) =>
       obj.id === targetId
