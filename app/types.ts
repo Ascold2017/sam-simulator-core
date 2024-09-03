@@ -23,6 +23,7 @@ export interface AAData {
     type: 'active-missile' | 'gun',
     ammoVelocity: number;
     ammoMaxRange: number;
+    viewAngle: number;
 }
 
 export interface MissionData {

@@ -7,11 +7,13 @@ interface AAParams {
     type: 'active-missile' | 'gun',
     ammoVelocity: number;
     ammoMaxRange: number;
+    viewAngle: number
 }
 export class AAObject extends Entity {
     ammoMaxRange: number;
     ammoVelocity: number;
     type: 'active-missile' | 'gun';
+    viewAngle: number;
     constructor(id: string, params: AAParams) {
         const body = new CANNON.Body({
             mass: 0,
@@ -25,5 +27,6 @@ export class AAObject extends Entity {
         this.ammoMaxRange = params.ammoMaxRange;
         this.ammoVelocity = params.ammoVelocity;
         this.type = params.type;
+        this.viewAngle = params.viewAngle;
     }
 }

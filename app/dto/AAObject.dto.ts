@@ -7,11 +7,13 @@ export class AAObjectDTO {
     type: 'active-missile' | 'gun';
     ammoVelocity: number;
     ammoMaxRange: number;
+    viewAngle: number;
     constructor(aa: AAObject) {
         this.id = aa.id;
         this.type = aa.type;
         this.ammoMaxRange = aa.ammoMaxRange;
         this.ammoVelocity = aa.ammoVelocity;
+        this.viewAngle = aa.viewAngle;
         this.position = {
             x: aa.body.position.x,
             y: aa.body.position.y,

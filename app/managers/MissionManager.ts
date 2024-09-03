@@ -62,6 +62,7 @@ class MissionManager {
           position: aa.position,
           ammoMaxRange: aa.ammoMaxRange,
           ammoVelocity: aa.ammoVelocity,
+          viewAngle: aa.viewAngle
 
         });
       this.engine.addEntity(aaObject);

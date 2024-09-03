@@ -1,12 +1,18 @@
 import { AAObject } from "../core/AAObject";
 import Engine from "../core/Engine";
 import WeaponManager from "./WeaponManager";
+import * as CANNON from "cannon-es";
+
+interface CapturedTarget {
+    aaId: string;
+    targetId: string;
+}
 
 export default class AAManager {
 
     private engine: Engine;
     private weaponManager: WeaponManager;
-    private capturedTargetIds: Set<string> = new Set()
+    private capturedTargetIds: CapturedTarget[] = []; // Массив объектов с идентификаторами AA и целей
 
     constructor(engine: Engine) {
         this.engine = engine;
@@ -19,86 +25,83 @@ export default class AAManager {
         ) as AAObject;
     }
 
-    private isWithinViewAngle(targetAzimuth: number, targetElevation: number, azimuth: number, elevation: number, viewAngle: number): boolean {
-        // Проверяем, находится ли цель в пределах углового обзора
-        const deltaAzimuth = Math.abs(targetAzimuth - azimuth);
-        const deltaElevation = Math.abs(targetElevation - elevation);
-        return deltaAzimuth <= viewAngle / 2 && deltaElevation <= viewAngle / 2;
+    private calculateViewDirection(azimuth: number, elevation: number): CANNON.Vec3 {
+        // Создаем вектор направления по умолчанию (направленный вдоль оси Z)
+        const direction = new CANNON.Vec3(0, 0, 1);
+
+        // Поворот по азимуту (вокруг оси Y)
+        const quaternionAzimuth = new CANNON.Quaternion();
+        quaternionAzimuth.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), azimuth);
+
+        // Поворот по углу возвышения (вокруг оси X)
+        const quaternionElevation = new CANNON.Quaternion();
+        quaternionElevation.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), elevation);
+
+        // Применяем сначала азимут, затем возвышение
+        quaternionAzimuth.mult(quaternionElevation).vmult(direction, direction);
+        
+        direction.normalize();
+        return direction
     }
 
-    captureFlightObjectOnDirection(aaId: string, azimuth: number, elevation: number) {
-        const flightObjects = this.engine.getFlightObjects();
-        const aa = this.getAAById(aaId);
-        if (!aa) return;
+    private calculateAngleBetweenVectors(v1: CANNON.Vec3, v2: CANNON.Vec3): number {
+        const dotProduct = v1.dot(v2);
+        const magnitudeV1 = v1.length();
+        const magnitudeV2 = v2.length();
+        const cosAngle = dotProduct / (magnitudeV1 * magnitudeV2);
+        return Math.acos(cosAngle) - Math.PI;
+    }
 
-        const viewAngle = Math.PI / 6;
+    captureFlightObjectOnDirection(aaId: string, azimuth: number, elevation: number): boolean {
+        const aa = this.getAAById(aaId);
+        if (!aa) return false;
+
+        const flightObjects = this.engine.getFlightObjects();
+        const viewDirection = this.calculateViewDirection(azimuth, elevation);
 
         for (const flightObject of flightObjects) {
-            const directionToTarget = {
-                x: flightObject.body.position.x - aa.body.position.x,
-                y: flightObject.body.position.y - aa.body.position.y,
-                z: flightObject.body.position.z - aa.body.position.z,
-            };
+            if (flightObject.isDestroyed) continue; // Пропускаем уничтоженные объекты
 
-            const distance = Math.sqrt(
-                directionToTarget.x ** 2 +
-                directionToTarget.y ** 2 +
-                directionToTarget.z ** 2
-            );
-
-            // Рассчитываем азимут и угол возвышения до цели
-            const targetAzimuth = Math.atan2(directionToTarget.y, directionToTarget.x);
-            const targetElevation = Math.asin(directionToTarget.z / distance);
-            console.log(targetAzimuth, azimuth)
-            if (this.isWithinViewAngle(targetAzimuth, targetElevation, azimuth, elevation, viewAngle)) {
-                this.capturedTargetIds.add(flightObject.id);
+            const directionToTarget = flightObject.body.position.vsub(aa.body.position)
+            directionToTarget.normalize();
+            const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
+            // Проверка: если угол меньше половины угла обзора, цель захвачена
+            if (Math.abs(angleBetween) < aa.viewAngle / 2) {
+                // Добавляем объект в массив захваченных целей
+                this.capturedTargetIds.push({ aaId, targetId: flightObject.id });
                 return true;
             }
         }
-        return false
-    }
 
+        return false;
+    }
     fire(aaId: string, azimuth: number, elevation: number) {
         const aa = this.getAAById(aaId);
-        let targetId: string | null = null;
+        if (!aa) return false;
 
-        for (const capturedId of this.capturedTargetIds) {
-            const flightObject = this.engine.getFlightObjects().find(
-                (obj) => obj.id === capturedId,
-            );
+        const capturedTarget = this.capturedTargetIds.find(
+            (entry) => entry.aaId === aaId
+        );
 
-            if (flightObject) {
-                const directionToTarget = {
-                    x: flightObject.body.position.x - aa.body.position.x,
-                    y: flightObject.body.position.y - aa.body.position.y,
-                    z: flightObject.body.position.z - aa.body.position.z,
-                };
+        if (!capturedTarget) return false;
 
-                const distance = Math.sqrt(
-                    directionToTarget.x ** 2 +
-                    directionToTarget.y ** 2 +
-                    directionToTarget.z ** 2
-                );
+        const flightObject = this.engine.getFlightObjects().find(
+            (obj) => obj.id === capturedTarget.targetId
+        );
 
-                // Рассчитываем азимут и угол возвышения до цели
-                const targetAzimuth = Math.atan2(directionToTarget.y, directionToTarget.x);
-                const targetElevation = Math.asin(directionToTarget.z / distance);
+        if (!flightObject || flightObject.isDestroyed) return false;
 
-                if (this.isWithinViewAngle(targetAzimuth, targetElevation, azimuth, elevation, 0.01)) {
-                    targetId = flightObject.id;
-                    break;
-                }
-            }
-        }
+        const viewDirection = this.calculateViewDirection(azimuth, elevation);
+        const directionToTarget = flightObject.body.position.vsub(aa.body.position)
+        directionToTarget.normalize();
+        const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
 
-        if (targetId) {
-            // Пример использования launchActiveMissile
-            this.weaponManager.launchActiveMissile(targetId, aa.ammoVelocity, aa.body.position, aa.ammoMaxRange);
+        if (Math.abs(angleBetween) < aa.viewAngle / 2) {
+            this.weaponManager.launchActiveMissile(capturedTarget.targetId, aa.ammoVelocity, aa.body.position, aa.ammoMaxRange);
             return true;
         }
 
-        return false
-
+        return false;
     }
 
 
