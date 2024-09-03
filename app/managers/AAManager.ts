@@ -39,7 +39,7 @@ export default class AAManager {
 
         // Применяем сначала азимут, затем возвышение
         quaternionAzimuth.mult(quaternionElevation).vmult(direction, direction);
-        
+
         direction.normalize();
         return direction
     }
@@ -79,29 +79,34 @@ export default class AAManager {
         const aa = this.getAAById(aaId);
         if (!aa) return false;
 
-        const capturedTarget = this.capturedTargetIds.find(
-            (entry) => entry.aaId === aaId
-        );
-
-        if (!capturedTarget) return false;
-
-        const flightObject = this.engine.getFlightObjects().find(
-            (obj) => obj.id === capturedTarget.targetId
-        );
-
-        if (!flightObject || flightObject.isDestroyed) return false;
-
         const viewDirection = this.calculateViewDirection(azimuth, elevation);
-        const directionToTarget = flightObject.body.position.vsub(aa.body.position)
-        directionToTarget.normalize();
-        const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
 
-        if (Math.abs(angleBetween) < aa.viewAngle / 2) {
-            this.weaponManager.launchActiveMissile(capturedTarget.targetId, aa.ammoVelocity, aa.body.position, aa.ammoMaxRange);
+        let closestTarget: { targetId: string, angle: number } | null = null;
+
+        this.capturedTargetIds.forEach((entry) => {
+            if (entry.aaId !== aaId) return;
+
+            const flightObject = this.engine.getFlightObjects().find(
+                (obj) => obj.id === entry.targetId
+            );
+
+            if (!flightObject || flightObject.isDestroyed) return;
+
+            const directionToTarget = flightObject.body.position.vsub(aa.body.position)
+            directionToTarget.normalize();
+            const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
+
+            if (Math.abs(angleBetween) < aa.viewAngle / 2) {
+                if (!closestTarget || angleBetween < closestTarget.angle) {
+                    closestTarget = { targetId: entry.targetId, angle: angleBetween };
+                }
+            }
+        });
+
+        if (closestTarget) {
+            this.weaponManager.launchActiveMissile(closestTarget.targetId, aa.ammoVelocity, aa.body.position, aa.ammoMaxRange);
             return true;
         }
-
-        return false;
     }
 
 
