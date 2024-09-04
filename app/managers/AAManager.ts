@@ -3,7 +3,7 @@ import Engine from "../core/Engine";
 import WeaponManager from "./WeaponManager";
 import * as CANNON from "cannon-es";
 
-interface CapturedTarget {
+export interface CapturedTarget {
     aaId: string;
     targetId: string;
 }
@@ -12,7 +12,7 @@ export default class AAManager {
 
     private engine: Engine;
     private weaponManager: WeaponManager;
-    private capturedTargetIds: CapturedTarget[] = []; // Массив объектов с идентификаторами AA и целей
+    capturedTargetIds: CapturedTarget[] = []; // Массив объектов с идентификаторами AA и целей
 
     constructor(engine: Engine) {
         this.engine = engine;
