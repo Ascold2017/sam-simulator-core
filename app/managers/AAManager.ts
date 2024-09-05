@@ -110,4 +110,8 @@ export default class AAManager {
     }
 
 
+    reset() {
+        this.capturedTargetIds = []
+    }
+
 }

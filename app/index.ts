@@ -50,6 +50,7 @@ export class Core {
 
     stopMission() {
         this.missionManager.clearEntities()
+        this.aaManager.reset();
         this.engine.stop()
     }
 
