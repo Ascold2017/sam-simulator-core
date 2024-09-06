@@ -2,7 +2,6 @@ import * as CANNON from "cannon-es";
 import Entity from "./Entity";
 import FlightObject from "./FlightObject";
 import HeightmapTerrain from "./HeightmapTerrain";
-import { AAObject } from "./AAObject";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -29,10 +28,6 @@ class Engine {
 
   getHeightmapTerrain() {
     return this.entities.find(e => e instanceof HeightmapTerrain);
-  }
-
-  getAAs() {
-    return this.entities.filter((e) => e instanceof AAObject)
   }
 
   addEntity(entity: Entity) {

@@ -1,5 +1,5 @@
-import { AAObject } from "../core/AAObject";
 import Engine from "../core/Engine";
+import { AAData } from "../types";
 import WeaponManager from "./WeaponManager";
 import * as CANNON from "cannon-es";
 
@@ -8,10 +8,20 @@ export interface CapturedTarget {
     targetId: string;
 }
 
+export interface AAObject {
+    id: string;
+    position: CANNON.Vec3,
+    type: 'active-missile' | 'gun',
+    ammoVelocity: number;
+    ammoMaxRange: number;
+    viewAngle: number;
+}
+
 export default class AAManager {
 
     private engine: Engine;
     private weaponManager: WeaponManager;
+    aas: AAObject[] = []
     capturedTargetIds: CapturedTarget[] = []; // Массив объектов с идентификаторами AA и целей
 
     constructor(engine: Engine) {
@@ -19,10 +29,16 @@ export default class AAManager {
         this.weaponManager = new WeaponManager(engine)
     }
 
+    public addAA(aaObject: AAData) {
+        this.aas.push({
+            ...aaObject,
+            type: aaObject.type as 'active-missile' | 'gun',
+            position: new CANNON.Vec3(aaObject.position.x, aaObject.position.y, aaObject.position.z)
+        })
+    }
+
     private getAAById(id: string) {
-        return this.engine.getAAs().find(
-            (entity) => entity.id === id,
-        ) as AAObject;
+        return this.aas.find(aa => aa.id === id) as AAObject;
     }
 
     private calculateViewDirection(azimuth: number, elevation: number): CANNON.Vec3 {
@@ -62,7 +78,7 @@ export default class AAManager {
         for (const flightObject of flightObjects) {
             if (flightObject.isDestroyed) continue; // Пропускаем уничтоженные объекты
 
-            const directionToTarget = flightObject.body.position.vsub(aa.body.position)
+            const directionToTarget = flightObject.body.position.vsub(aa.position)
             directionToTarget.normalize();
             const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
             // Проверка: если угол меньше половины угла обзора, цель захвачена
@@ -92,7 +108,7 @@ export default class AAManager {
 
             if (!flightObject || flightObject.isDestroyed) return;
 
-            const directionToTarget = flightObject.body.position.vsub(aa.body.position)
+            const directionToTarget = flightObject.body.position.vsub(aa.position)
             directionToTarget.normalize();
             const angleBetween = this.calculateAngleBetweenVectors(viewDirection, directionToTarget);
 
@@ -104,7 +120,8 @@ export default class AAManager {
         });
 
         if (closestTarget) {
-            this.weaponManager.launchActiveMissile(closestTarget.targetId, aa.ammoVelocity, aa.body.position, aa.ammoMaxRange);
+            // @ts-ignore
+            this.weaponManager.launchActiveMissile(closestTarget.targetId, aa.ammoVelocity, aa.position, aa.ammoMaxRange);
             return true;
         }
     }
@@ -112,6 +129,7 @@ export default class AAManager {
 
     reset() {
         this.capturedTargetIds = []
+        this.aas = []
     }
 
 }

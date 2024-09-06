@@ -1,15 +1,14 @@
 import Engine from "./core/Engine";
-import { AAObjectDTO } from "./dto/AAObject.dto";
 import { FlightObjectDTO } from "./dto/FlightObject.dto";
 import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
 import AAManager, { CapturedTarget } from "./managers/AAManager";
 import MissionManager from "./managers/MissionManager";
 import TargetManager from "./managers/TargetManager";
-import { MissionData, Position } from "./types";
+import { AAData, MissionData } from "./types";
 
 export * from './types'
 
-export type { FlightObjectDTO, HeightmapTerrainDTO, CapturedTarget, AAObjectDTO };
+export type { FlightObjectDTO, HeightmapTerrainDTO, CapturedTarget };
 export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
@@ -65,7 +64,11 @@ export class Core {
     }
 
     getAAs() {
-        return this.engine.getAAs().map(aa => new AAObjectDTO(aa))
+        return this.aaManager.aas
+    }
+
+    addAA(aaData: AAData) {
+        this.aaManager.addAA(aaData)
     }
 
     getCapturedTargets() {

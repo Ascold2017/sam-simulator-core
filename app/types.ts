@@ -29,7 +29,6 @@ export interface AAData {
 export interface MissionData {
     map: MapData;
     targets: TargetData[];
-    aas: AAData[]
 }
 
 export interface Waypoint {
