@@ -9,7 +9,7 @@ import { MissionData, Position } from "./types";
 
 export * from './types'
 
-export type { FlightObjectDTO, HeightmapTerrainDTO, CapturedTarget };
+export type { FlightObjectDTO, HeightmapTerrainDTO, CapturedTarget, AAObjectDTO };
 export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
