@@ -17,6 +17,10 @@ export interface TargetData {
     waypoints: Waypoint[];
 }
 
+export interface AAPosition {
+    id: number;
+    position: Position;
+}
 export interface AAData {
     id: string;
     position: Position;
@@ -29,7 +33,7 @@ export interface AAData {
 export interface MissionData {
     map: MapData;
     targets: TargetData[];
-    aaPositions: Position[]
+    aaPositions: AAPosition[]
 }
 
 export interface Waypoint {
