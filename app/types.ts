@@ -34,6 +34,7 @@ export interface MissionData {
     map: MapData;
     targets: TargetData[];
     aaPositions: AAPosition[]
+    duration: number;
 }
 
 export interface Waypoint {
