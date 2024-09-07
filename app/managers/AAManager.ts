@@ -37,6 +37,10 @@ export default class AAManager {
         })
     }
 
+    public removeAA(aaId: string) {
+        this.aas = this.aas.filter(aa => aa.id !== aaId);
+    }
+
     private getAAById(id: string) {
         return this.aas.find(aa => aa.id === id) as AAObject;
     }
