@@ -1,4 +1,4 @@
-import { MissionData } from "../app";
+import { type MissionData } from "../../../app/index";
 
 export const missionData: MissionData = {
     map: {
