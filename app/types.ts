@@ -1,3 +1,5 @@
+import * as CANNON from "cannon-es";
+
 export interface Position {
     x: number;
     y: number;
@@ -24,10 +26,11 @@ export interface AAPosition {
 export interface AAData {
     id: string;
     position: Position;
-    type: 'active-missile' | 'gun',
+    type: 'missile' | 'gun',
     ammoVelocity: number;
     ammoMaxRange: number;
-    viewAngle: number;
+    ammoKillRadius: number;
+    captureAngle: number;
 }
 
 export interface MissionData {
@@ -45,3 +48,24 @@ export interface RouteData {
     targetId: string;
     waypoints: Waypoint[];
 }
+
+export interface CreateWeaponChannelPayload {
+    position: Position;
+    captureAngle: number;
+    weaponParams: MissilePayload;
+}
+
+export interface MissilePayload {
+    maxRange: number
+    speed: number
+    killRadius: number
+  }
+  
+  export interface WeaponChannel {
+    missileId?: string
+    targetId?: string;
+    rayDirection: CANNON.Vec3
+    captureAngle: number;
+    position: CANNON.Vec3;
+    weaponParams: MissilePayload;
+  }

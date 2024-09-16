@@ -4,7 +4,7 @@ import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
 import AAManager, { CapturedTarget, AAObject } from "./managers/AAManager";
 import MissionManager from "./managers/MissionManager";
 import TargetManager from "./managers/TargetManager";
-import { AAData, MissionData } from "./types";
+import { AAData, MissionData, Position } from "./types";
 
 export * from './types'
 
@@ -75,18 +75,14 @@ export class Core {
         this.aaManager.removeAA(aaId)
     }
 
-    getCapturedTargets() {
-        return this.aaManager.capturedTargetIds.slice(0)
-    }
-
 
     /// AA ///
-    captureTargetOnDirection(aaId: string, azimuth: number, elevation: number) {
-        return this.aaManager.captureFlightObjectOnDirection(aaId, azimuth, elevation)
+    updateAADirection(aaId: string, direction: Position) {
+        return this.aaManager.updateAADirection(aaId, direction);
     }
 
-    fire(aaId: string, azimuth: number, elevation: number) {
-        return this.aaManager.fire(aaId, azimuth, elevation)
+    fire(aaId: string) {
+        return this.aaManager.fire(aaId)
     }
 
 }
