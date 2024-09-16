@@ -7,6 +7,7 @@ import {
   TargetData,
 } from "../types";
 import TargetManager from "./TargetManager";
+import { v4 as uuidv4 } from "uuid";
 
 class MissionManager {
   private engine: Engine;
@@ -33,9 +34,9 @@ class MissionManager {
 
   private initTargets(targets: TargetData[]) {
     for (const targetData of targets) {
-
+      const targetId = `${targetData.id}_${uuidv4()}`;
       const target = new TargetObject({
-        id: targetData.id,
+        id: targetId,
         initialPosition: targetData.waypoints[0].position,
         size: targetData.size,
         rcs: targetData.rcs
@@ -43,7 +44,7 @@ class MissionManager {
       this.engine.addEntity(target);
       // Устанавливаем маршруты для целей
       this.targetManager.updateRoute({
-        targetId: targetData.id,
+        targetId: targetId,
         waypoints: targetData.waypoints.slice(1),
       });
     }
