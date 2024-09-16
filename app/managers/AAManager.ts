@@ -3,10 +3,6 @@ import { AAData, Position } from "../types";
 import WeaponManager from "./WeaponManager";
 import * as CANNON from "cannon-es";
 
-export interface CapturedTarget {
-    aaId: string;
-    targetId: string;
-}
 
 export interface AAObject {
     id: string;

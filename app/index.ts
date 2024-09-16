@@ -1,14 +1,14 @@
 import Engine from "./core/Engine";
 import { FlightObjectDTO } from "./dto/FlightObject.dto";
 import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
-import AAManager, { CapturedTarget, AAObject } from "./managers/AAManager";
+import AAManager, { AAObject } from "./managers/AAManager";
 import MissionManager from "./managers/MissionManager";
 import TargetManager from "./managers/TargetManager";
 import { AAData, MissionData, Position } from "./types";
 
 export * from './types'
 
-export type { FlightObjectDTO, HeightmapTerrainDTO, CapturedTarget, AAObject };
+export type { FlightObjectDTO, HeightmapTerrainDTO, AAObject };
 export class Core {
     private engine: Engine;
     private missionManager: MissionManager;
