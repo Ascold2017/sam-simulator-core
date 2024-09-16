@@ -52,11 +52,10 @@ export default class AAManager {
         return this.aas.find(aa => aa.id === id) as AAObject;
     }
 
-    updateAADirection(aaId: string, direction: Position) {
+    updateAADirection(aaId: string, direction: Position): string | null {
         const aa = this.getAAById(aaId);
-        if (!aa) return false;
-        this.weaponManager.updateWeaponChannel(aa.channelId, direction);
-        return true
+        if (!aa) return null;
+        return this.weaponManager.updateWeaponChannel(aa.channelId, direction) || null;
     }
 
     fire(aaId: string) {
