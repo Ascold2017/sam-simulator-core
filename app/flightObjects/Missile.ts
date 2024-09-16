@@ -15,6 +15,8 @@ class Missile extends FlightObject {
   speed: number;
   killRadius: number;
   maxRange: number;
+  startPosition: Position;
+  traveledDistance: number = 0;
 
   constructor({
     id,
@@ -38,6 +40,7 @@ class Missile extends FlightObject {
     this.killRadius = killRadius;
     this.maxRange = maxRange;
     this.speed = speed;
+    this.startPosition = startPosition;
   }
 
   updateCallback(deltaTime: number): void {

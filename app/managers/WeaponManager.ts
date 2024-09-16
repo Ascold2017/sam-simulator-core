@@ -7,6 +7,8 @@ import {
 import Engine from "../core/Engine";
 import Missile from "../flightObjects/Missile";
 import { v4 as uuidv4 } from "uuid";
+import FlightObject from "../core/FlightObject";
+import TargetObject from "../flightObjects/TargetObject";
 
 class WeaponManager {
   private engine: Engine;
@@ -47,7 +49,31 @@ class WeaponManager {
       direction.y,
       direction.z
     );
-    // TODO search and set targetId
+    const flightObjects = this.engine.getFlightObjects();
+
+    const target = flightObjects.filter(fo => fo instanceof TargetObject).find(fo => {
+      
+      const targetPosition = fo.body.position; // CANNON.Vec3
+      const weaponPosition = weaponChannel.position; // CANNON.Vec3
+  
+      // Вектор на цель
+      const directionToTarget = targetPosition.vsub(weaponPosition);
+      
+      // Нормализуем вектор направления луча и направления на цель
+      const normalizedRayDirection = weaponChannel.rayDirection.clone()
+      normalizedRayDirection.normalize();
+      const normalizedDirectionToTarget = directionToTarget.clone();
+      normalizedDirectionToTarget.normalize();
+  
+      // Угол между направлением луча и направлением на цель
+      const dotProduct = normalizedRayDirection.dot(normalizedDirectionToTarget);
+      const angleToTarget = Math.acos(dotProduct); // В радианах
+  
+      // Проверка, что цель находится в пределах угла захвата
+      return angleToTarget < weaponChannel.captureAngle;
+    })
+    weaponChannel.targetId = target?.id;
+    return weaponChannel.targetId;
   }
 
   launchMissile(channelId: string) {
@@ -61,7 +87,7 @@ class WeaponManager {
     });
 
     missile.updateCallback = (deltaTime: number) => {
-      this.updateMissile(channelId, missile);
+      this.updateMissile(channelId, missile, deltaTime);
     };
 
     this.weaponChannels.set(channelId, {
@@ -72,7 +98,7 @@ class WeaponManager {
     this.engine.addEntity(missile);
   }
 
-  private updateMissile(channelId: string, missile: Missile) {
+  private updateMissile(channelId: string, missile: Missile, deltaTime: number) {
     const weaponChannel = this.weaponChannels.get(channelId);
 
     if (!weaponChannel) {
@@ -83,8 +109,7 @@ class WeaponManager {
 
     // Подъем на 100 метров, после чего ракета направляется к точке перехвата
     if (!missile.isLaunched) {
-      // TODO fix
-      if (missilePosition.y < 100) {
+      if (missilePosition.y < missile.startPosition.y + 100) {
         missile.velocity.set(0, 100, 0); // Вертикальный подъем
         return;
       }
@@ -100,7 +125,13 @@ class WeaponManager {
           (t) => t.id === weaponChannel.targetId
         );
         if (!foundTarget) {
-          missile.kill();
+          console.log('target not found', weaponChannel.targetId);
+          missile.destroy();
+          this.weaponChannels.set(channelId, {
+            ...weaponChannel,
+            missileId: undefined,
+            targetId: undefined,
+          });
           return;
         }
 
@@ -109,8 +140,14 @@ class WeaponManager {
           missilePosition.distanceTo(foundTarget.body.position) <
           missile.killRadius
         ) {
+          console.log('kill target', weaponChannel.targetId);
           foundTarget.kill();
           missile.destroy();
+          this.weaponChannels.set(channelId, {
+            ...weaponChannel,
+            missileId: undefined,
+            targetId: undefined,
+          });
           return;
         }
         // Летим к цели
@@ -123,6 +160,16 @@ class WeaponManager {
         direction.normalize();
         missile.velocity = direction.scale(missile.speed);
       }
+    }
+
+    missile.traveledDistance += missile.velocity.length() * deltaTime;
+    if (missile.traveledDistance > missile.maxRange) {
+      console.log('missile out of range');
+      missile.destroy();
+      this.weaponChannels.set(channelId, {
+        ...weaponChannel,
+        missileId: undefined,
+      })
     }
   }
 }
