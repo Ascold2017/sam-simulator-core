@@ -26,7 +26,7 @@ class Missile extends FlightObject {
     speed,
   }: MissileConstructor) {
     const body = new CANNON.Body({
-      mass: 1,
+      mass: 1000,
       position: new CANNON.Vec3(
         startPosition.x,
         startPosition.y,

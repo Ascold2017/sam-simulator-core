@@ -126,7 +126,7 @@ class WeaponManager {
         );
         if (!foundTarget) {
           console.log('target not found', weaponChannel.targetId);
-          missile.destroy();
+          missile.kill();
           this.weaponChannels.set(channelId, {
             ...weaponChannel,
             missileId: undefined,
@@ -142,7 +142,7 @@ class WeaponManager {
         ) {
           console.log('kill target', weaponChannel.targetId);
           foundTarget.kill();
-          missile.destroy();
+          missile.kill();
           this.weaponChannels.set(channelId, {
             ...weaponChannel,
             missileId: undefined,
@@ -165,7 +165,7 @@ class WeaponManager {
     missile.traveledDistance += missile.velocity.length() * deltaTime;
     if (missile.traveledDistance > missile.maxRange) {
       console.log('missile out of range');
-      missile.destroy();
+      missile.kill();
       this.weaponChannels.set(channelId, {
         ...weaponChannel,
         missileId: undefined,

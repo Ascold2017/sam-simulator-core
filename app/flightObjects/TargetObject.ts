@@ -12,7 +12,7 @@ class TargetObject extends FlightObject {
   rcs: number;
   constructor({ id, initialPosition, size, rcs }: TargetObjectConstructor) {
     const body = new CANNON.Body({
-      mass: 1,
+      mass: 20000,
       position: new CANNON.Vec3(
         initialPosition.x,
         initialPosition.y,

@@ -10,7 +10,7 @@ class FlightObject extends Entity {
     super(id, body);
     this.velocity = velocity;
     this.isKilled = false;
-    this.body.addEventListener('collide', () => this.onCollide())
+    this.body.addEventListener('collide', (e: any) => this.onCollide(e))
   }
 
   update(deltaTime: number) {
@@ -30,9 +30,17 @@ class FlightObject extends Entity {
     this.isKilled = true;
   }
 
-  private onCollide() {
-    console.log('collide', this.id)
-    this.destroy();
+  private onCollide(e: any) {
+    const targetBody = e.body; // объект, с которым произошло столкновение
+    if (targetBody && targetBody.shapes.length > 0) {
+      // Проверяем, является ли объект землей (Heightfield)
+      const isHeightfield = targetBody.shapes.some(shape => shape instanceof CANNON.Heightfield);
+      
+      if (isHeightfield) {
+        console.log('FlightObject collided with the ground:', this.id);
+        this.destroy();
+      }
+    }
   }
 }
 
