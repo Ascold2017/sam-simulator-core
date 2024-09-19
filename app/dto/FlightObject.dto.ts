@@ -7,12 +7,14 @@ import { Position } from "../types";
 export class FlightObjectDTO {
     id: string;
     isKilled: boolean;
+    isDestroyed: boolean;
     position: Position;
     velocity: Position;
     type: 'target' | 'missile' | 'bullet' | 'unknown';
     constructor(flightObject: FlightObject) {
         this.id = flightObject.id;
         this.isKilled = flightObject.isKilled;
+        this.isDestroyed = flightObject.isDestroyed;
         this.position = {
             x: flightObject.body.position.x,
             y: flightObject.body.position.y,

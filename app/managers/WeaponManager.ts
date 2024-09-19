@@ -105,6 +105,9 @@ class WeaponManager {
       missile.destroy();
       return;
     }
+
+    if (missile.isDestroyed) return;
+
     const missilePosition = missile.body.position;
 
     // Подъем на 100 метров, после чего ракета направляется к точке перехвата
@@ -119,14 +122,13 @@ class WeaponManager {
     // Если ракета достигла высоты, направляем ее к точке перехвата
     if (missile.isLaunched) {
       if (weaponChannel.targetId) {
-        // Поиск цели в зоне поиска
         const targets = this.engine.getFlightObjects();
         const foundTarget = targets.find(
           (t) => t.id === weaponChannel.targetId
         );
-        if (!foundTarget) {
+        if (!foundTarget || foundTarget?.isDestroyed) {
           console.log('target not found', weaponChannel.targetId);
-          missile.kill();
+          missile.destroy();
           this.weaponChannels.set(channelId, {
             ...weaponChannel,
             missileId: undefined,
@@ -142,7 +144,7 @@ class WeaponManager {
         ) {
           console.log('kill target', weaponChannel.targetId);
           foundTarget.kill();
-          missile.kill();
+          missile.destroy();
           this.weaponChannels.set(channelId, {
             ...weaponChannel,
             missileId: undefined,
@@ -165,7 +167,7 @@ class WeaponManager {
     missile.traveledDistance += missile.velocity.length() * deltaTime;
     if (missile.traveledDistance > missile.maxRange) {
       console.log('missile out of range');
-      missile.kill();
+      missile.destroy();
       this.weaponChannels.set(channelId, {
         ...weaponChannel,
         missileId: undefined,
