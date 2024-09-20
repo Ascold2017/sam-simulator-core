@@ -9,7 +9,7 @@ export class FlightObjectDTO {
     isKilled: boolean;
     isDestroyed: boolean;
     position: Position;
-    velocity: Position;
+    quaternion: [number, number, number, number];
     type: 'target' | 'missile' | 'bullet' | 'unknown';
     constructor(flightObject: FlightObject) {
         this.id = flightObject.id;
@@ -20,11 +20,8 @@ export class FlightObjectDTO {
             y: flightObject.body.position.y,
             z: flightObject.body.position.z
         }
-        this.velocity = {
-            x: flightObject.body.velocity.x,
-            y: flightObject.body.velocity.y,
-            z: flightObject.body.velocity.z
-        }
+        this.quaternion = flightObject.body.quaternion.toArray()
+        
         this.type = (() => {
             if (flightObject instanceof TargetObject) return 'target'
             if (flightObject instanceof Missile) return 'missile'
