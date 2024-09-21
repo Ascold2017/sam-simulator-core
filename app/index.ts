@@ -1,88 +1,53 @@
-import Engine from "./core/Engine";
-import { FlightObjectDTO } from "./dto/FlightObject.dto";
-import { HeightmapTerrainDTO } from "./dto/HeightmapTerrain.dto";
-import AAManager, { AAObject } from "./managers/AAManager";
-import MissionManager from "./managers/MissionManager";
-import TargetManager from "./managers/TargetManager";
-import { AAData, MissionData, Position } from "./types";
+import {EventEmitter} from "events";
+import { World } from "./entities/World";
+import HeightmapTerrain, { HeightmapTerrainProps } from "./entities/HeightmapTerrain";
 
-export * from './types'
+// Константа для частоты обновления (40 раз в секунду)
+const UPDATE_FREQUENCY = 1 / 40;
 
-export type { FlightObjectDTO, HeightmapTerrainDTO, AAObject };
+interface CoreParams {
+    heightmapTerrain: HeightmapTerrainProps;
+}
 export class Core {
-    private engine: Engine;
-    private missionManager: MissionManager;
-    private targetManager: TargetManager;
-    private aaManager: AAManager
-    updateListener: Function | null = null
-    constructor() {
-        this.engine = new Engine();
-        this.missionManager = new MissionManager(this.engine)
-        this.targetManager = new TargetManager(this.engine);
-        this.aaManager = new AAManager(this.engine)
-        this.engine.addEventListener('update', () => {
-            this.updateListener && this.updateListener()
-        })
+    readonly eventEmitter = new EventEmitter();
+    private gameWorld: World;
+    private lastUpdateTime: number = Date.now();
+
+    constructor(params: CoreParams) {
+        this.gameWorld = new World();
+        this.initEntities(params);
+        setInterval(() => this.update(), UPDATE_FREQUENCY * 1000);
     }
 
-    /// ENGINE ///
-    get engineIsStarted() {
-        return !!this.engine.isRunning
-    }
-    get engineTimeScale() {
-        return this.engine.timeScale;
-    }
-    set engineTimeScale(v: number) {
-        this.engine.setTimeScale(v)
-    }
-    startEngine() {
-        this.engine.start()
-    }
-    stopEngine() {
-        this.engine.stop()
-    }
-    /// MISSION ///
-    startMission(data: MissionData) {
-        this.missionManager.createEntities(data);
-        this.engine.start();
+    private update() {
+        const now = Date.now();
+        const deltaTime = (now - this.lastUpdateTime) / 1000;
+        if (deltaTime >= UPDATE_FREQUENCY) {
+            this.lastUpdateTime = now;
+            this.gameWorld.updateWorld(deltaTime);
+            this.eventEmitter.emit("update_world_state", this.getWorldState());
+        }
     }
 
-    stopMission() {
-        this.missionManager.clearEntities()
-        this.aaManager.reset();
-        this.engine.stop()
+    getWorldState() {
+        return this.gameWorld.getState();
     }
 
-    /// GETTERS ///
-    getFlightObjects() {
-        return this.engine.getFlightObjects().map(fo => new FlightObjectDTO(fo))
+    private initEntities(params: CoreParams) {
+        // ## TERRAIN ##
+        const terrain = new HeightmapTerrain(params.heightmapTerrain);
+        this.gameWorld.addEntity(terrain);
     }
 
-    getHeightmapTerrain() {
-        const entity = this.engine.getHeightmapTerrain();
-        return entity && new HeightmapTerrainDTO(entity)
+    addAA() {
+        // TODO
     }
 
-    getAAs() {
-        return this.aaManager.aas
+    removeAA() {
+        // TODO
     }
 
-    addAA(aaData: AAData) {
-        this.aaManager.addAA(aaData)
+    collisionTest() {
+        this.gameWorld.addCollisionTest();
     }
-
-    removeAA(aaId: string) {
-        this.aaManager.removeAA(aaId)
-    }
-
-
-    /// AA ///
-    updateAADirection(aaId: string, direction: Position) {
-        return this.aaManager.updateAADirection(aaId, direction);
-    }
-
-    fire(aaId: string) {
-        return this.aaManager.fire(aaId)
-    }
-
 }

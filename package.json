@@ -12,7 +12,9 @@
   "dependencies": {
     "@types/node": "^22.1.0",
     "cannon-es": "^0.20.0",
+    "canvas": "^2.11.2",
     "dat.gui": "^0.7.9",
+    "events": "^3.3.0",
     "three": "^0.167.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
