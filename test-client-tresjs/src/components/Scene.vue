@@ -14,18 +14,21 @@
         <TresGridHelper :args="[1000]" />
         <TresAxesHelper :args="[100]" />
 
+        <Cone :args="[5, 10, 32]" :rotation="[0, 0, -Math.PI / 2]" color="yellow" />
+
         <!-- Объекты из движка -->
         <TresGroup ref="engineObjects">
-            <TresMesh v-for="flightObject in flightObjects" :key="flightObject.id"  :position="[flightObject.position.x, flightObject.position.y, flightObject.position.z]">
-                <primitive :object="getGeometryForFlightObject(flightObject.type)" :material="getMaterialForFlightObject(flightObject.type)" />
-                
-            </TresMesh>
+            <TresGroup v-for="flightObject in flightObjects" :key="flightObject.id"
+                :quaternion="flightObject.quaternion"
+                :position="[flightObject.position.x, flightObject.position.y, flightObject.position.z]">
+                <Cone :args="[5, 10, 32]" :rotation="[0, 0, -Math.PI / 2]" color="red" />
+            </TresGroup>
         </TresGroup>
 
         <!-- Террейн -->
         <TresMesh ref="terrain" :rotation="[-Math.PI / 2, 0, 0]" v-if="terrainGeometry">
             <primitive :object="terrainGeometry" />
-            <TresMeshStandardMaterial :color="0x0000ff" :side="THREE.BackSide"/>
+            <TresMeshStandardMaterial :color="0x0000ff" :side="THREE.BackSide" />
         </TresMesh>
 
     </TresCanvas>
@@ -37,7 +40,7 @@ import { missionData } from '@/assets/missionData'
 import { TresCanvas } from '@tresjs/core'
 import { ref, onMounted } from 'vue';
 import { Core, type FlightObjectDTO } from '../../../app/index'
-import { OrbitControls } from '@tresjs/cientos'
+import { OrbitControls, Cone } from '@tresjs/cientos'
 import { Mesh, BufferGeometry, Material, PlaneGeometry, SphereGeometry, CylinderGeometry, BoxGeometry, MeshStandardMaterial } from 'three';
 
 const flightObjects = ref<FlightObjectDTO[]>([]);

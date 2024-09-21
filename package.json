@@ -15,7 +15,8 @@
     "dat.gui": "^0.7.9",
     "three": "^0.167.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.13",
