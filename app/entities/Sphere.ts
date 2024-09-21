@@ -18,9 +18,7 @@ export default class SphereEntity extends Entity {
         const targetBody = event.body; // объект, с которым произошло столкновение
         if (targetBody && targetBody.shapes.length > 0) {
           // Проверяем, является ли объект землей (Heightfield)
-          const isHeightfield = targetBody.shapes.some(
-            (shape: any) => shape instanceof CANNON.Heightfield
-          );
+          const isHeightfield = targetBody.mass === 0;
           if (isHeightfield) {
             this.hasCollided = true;
           }
