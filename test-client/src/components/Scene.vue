@@ -22,6 +22,22 @@
             <Cone :args="[npc.size / 3, npc.size, 32]" color="yellow" :rotation="[0, 0, -Math.PI / 2]" />
         </TresGroup>
 
+        <TresGroup v-for="gm in guidedMissiles" :position="gm.position" :quaternion="gm.quaternion" :key="gm.id">
+            <Cone :args="[2, 6, 32]" color="orange" :rotation="[0, 0, -Math.PI / 2]" />
+        </TresGroup>
+
+        <TresGroup v-for="aa in aas" :position="aa.position" :key="aa.id">
+            <Cone :args="[2, 5, 32]" color="red" />
+            <Line2 :points="[
+                [0, 0, 0],
+                [
+                    (aa.aimRay[0] || 1) * 100,
+                    (aa.aimRay[1] || 1) * 100,
+                    (aa.aimRay[2] || 1) * 100
+                ]
+            ]" color="green" linewidth="5" />
+        </TresGroup>
+
         <!-- Террейн -->
         <Suspense>
             <GLTFModel path="/mars/scene.gltf" color="white" />
@@ -33,10 +49,12 @@
 
 <script setup lang="ts">
 import { TresCanvas } from '@tresjs/core'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { Core } from '../../../app/index'
-import { OrbitControls, Cone, GLTFModel, Sphere } from '@tresjs/cientos'
+import { OrbitControls, Cone, GLTFModel, Sphere, Line2 } from '@tresjs/cientos'
 import type { TargetNPCState } from '../../../app/entities/TargetNPC';
+import type { AAState } from '../../../app/entities/AA';
+import type { GuidedMissileState } from '../../../app/entities/GuidedMissile';
 
 const sphereEntities = ref<{
     id: string,
@@ -47,6 +65,17 @@ const sphereEntities = ref<{
 }[]>([])
 
 const targetNPCs = ref<TargetNPCState[]>([])
+const guidedMissiles = ref<GuidedMissileState[]>([])
+const aas = ref<AAState[]>([])
+
+const aaId = 'aa-01';
+const aimRay = reactive({ x: 0, y: 0, z: 0 })
+
+function normalizeVector(x: number, y: number, z: number) {
+    const length = Math.sqrt(x * x + y * y + z * z);
+    if (length === 0) return { x: 0, y: 0, z: 0 };
+    return { x: x / length, y: y / length, z: z / length };
+}
 
 async function initCore() {
 
@@ -87,14 +116,51 @@ async function initCore() {
     core.eventEmitter.on('update_world_state', (data) => {
         sphereEntities.value = data.filter(i => i.type === 'sphere') as any[]
         targetNPCs.value = data.filter(i => i.type === 'target-npc') as TargetNPCState[]
+        guidedMissiles.value = data.filter(i => i.type === 'guided-missile') as GuidedMissileState[]
+        aas.value = data.filter(i => i.type === 'aa') as AAState[]
     })
 
+    core.addAA({
+        id: 'aa-01',
+        position: { x: 100, y: 200, z: 50 },
+        type: 'guided-missile',
+        ammoCount: 16,
+        radarProps: {},
+        ammoProps: {
+            activeRange: 6000,
+            maxRange: 10000,
+            minRange: 100,
+            killRadius: 10,
+            maxOverload: 1000,
+            maxVelocity: 100,
+        }
+    })
 
+    function handleKeydown(event: KeyboardEvent) {
+        switch (event.key) {
+            case ' ':
+                fireMissile();
+                return;
+        }
+        const normalizedAimRay = normalizeVector(aimRay.x, aimRay.y, aimRay.z);
+        core.eventEmitter.emit('update_aa_aim_ray', { aaId: 'aa-01', aimRay: [normalizedAimRay.x, normalizedAimRay.y, normalizedAimRay.z] });
+
+    }
+
+    // Функция для стрельбы (пробел)
+    function fireMissile() {
+        console.log("Fire missile");
+        core.eventEmitter.emit('fire_aa', { aaId });
+    }
+    window.addEventListener('keydown', handleKeydown);
 }
+
+
 
 
 onMounted(() => {
     initCore();
+
 })
 </script>
 

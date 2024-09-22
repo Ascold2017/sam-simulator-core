@@ -3,6 +3,7 @@ import HeightmapTerrain, { HeightmapTerrainProps } from "./entities/HeightmapTer
 import TargetNPC, { TargetNPCState, type TargetNPCParams } from "./entities/TargetNPC";
 import TypedEmitter from "./utils/TypedEmitter";
 import { EntityState } from "./entities/Entity";
+import { AA, AAProps } from "./entities/AA";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -16,6 +17,8 @@ interface EventMap {
     update_world_state: EntityState[];
     kill_npc: TargetNPCState;
     destroy_npc: TargetNPCState;
+    update_aa_aim_ray: {aaId: string, aimRay: [number, number, number]};
+    fire_aa: {aaId: string};
 }
 export class Core {
     readonly eventEmitter = new TypedEmitter<EventMap>();
@@ -26,6 +29,8 @@ export class Core {
         this.gameWorld = new World();
         this.initEntities(params);
         setInterval(() => this.update(), UPDATE_FREQUENCY * 1000);
+        this.eventEmitter.on('update_aa_aim_ray', (data) =>this.updateAAAimRay(data.aaId, data.aimRay));
+        this.eventEmitter.on('fire_aa', (data) => this.fireAA(data.aaId));
     }
 
     private update() {
@@ -56,15 +61,27 @@ export class Core {
         }
     }
 
-    addAA() {
-        // TODO
+    addAA(aaPrps: AAProps) {
+        const aa = new AA(aaPrps, this.gameWorld);
+        this.gameWorld.addEntity(aa);
     }
 
-    removeAA() {
-        // TODO
+    removeAA(aaId: string) {
+        this.gameWorld.removeEntity(aaId);
     }
+
 
     collisionTest() {
         this.gameWorld.addCollisionTest();
+    }
+
+    private updateAAAimRay(aaId: string, aimRay: [number, number, number]) {
+        const aa = this.gameWorld.getEntityById(aaId) as AA;
+        aa?.updateAimRay(aimRay);
+    }
+
+    private fireAA(aaId: string) {
+        const aa = this.gameWorld.getEntityById(aaId) as AA;
+        aa?.fire();
     }
 }

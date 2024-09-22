@@ -14,6 +14,10 @@ export class World {
     return this.entities.map((entity) => entity.getState());
   }
 
+  getEntityById(id: string) {
+    return this.entities.find((entity) => entity.id === id);
+  }
+
   updateWorld(deltaTime: number) {
     this.cannonWorld.step(deltaTime);
     for (const entity of this.entities) {
