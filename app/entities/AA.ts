@@ -29,7 +29,7 @@ export class AA extends Entity<AAEvents> {
   private ammoProps: Omit<GuidedMissileProps, 'id' | 'startPosition'>;
   private ammoCount: number;
   private launched: GuidedMissile[] = [];
-  private aimRay = new CANNON.Vec3(0, 0, 0);
+  private aimRay = new CANNON.Vec3(1, 1, 1);
   private gameWorld: World;
 
   constructor(props: AAProps, gameWorld: World) {

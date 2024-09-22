@@ -29,7 +29,7 @@ export class Core {
         this.gameWorld = new World();
         this.initEntities(params);
         setInterval(() => this.update(), UPDATE_FREQUENCY * 1000);
-        this.eventEmitter.on('update_aa_aim_ray', (data) =>this.updateAAAimRay(data.aaId, data.aimRay));
+        this.eventEmitter.on('update_aa_aim_ray', (data) => this.updateAAAimRay(data.aaId, data.aimRay));
         this.eventEmitter.on('fire_aa', (data) => this.fireAA(data.aaId));
     }
 
