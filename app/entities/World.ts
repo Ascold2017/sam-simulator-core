@@ -21,7 +21,7 @@ export class World {
     }
   }
 
-  addEntity(entity: Entity) {
+  addEntity(entity: Entity<any>) {
     this.entities.push(entity);
     this.cannonWorld.addBody(entity.body);
   }

@@ -1,7 +1,20 @@
-import Entity from "./Entity";
+import Entity, { EntityState, type EntityEvents } from "./Entity";
 import * as CANNON from "cannon-es";
 
-class FlightObject extends Entity {
+
+
+export interface FlightObjectState extends EntityState {
+  type: "flight-object" | string;
+  velocity: [number, number, number];
+  isKilled: boolean;
+}
+
+export interface FlightObjectEvents extends EntityEvents {
+  kill: FlightObjectState;
+  destroy: FlightObjectState;
+}
+
+class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> extends Entity<TEvents> {
   velocity: CANNON.Vec3;
   isKilled: boolean;
 
@@ -21,12 +34,13 @@ class FlightObject extends Entity {
       this.body.applyForce(gravityCompensation, this.body.position);
     } else {
       this.body.velocity = this.velocity;
-      this.updateRotationAccordingToVelocity();
     }
+    this.updateRotationAccordingToVelocity();
   }
 
   kill() {
     this.isKilled = true;
+    this.eventEmitter.emit("kill", this.getState());
   }
 
   private onCollide(e: any) {
@@ -34,7 +48,7 @@ class FlightObject extends Entity {
     if (targetBody && targetBody.shapes.length > 0) {
       // Проверяем, является ли объект землей (Heightfield)
       const isHeightfield = targetBody.shapes.some(
-        (shape) => shape instanceof CANNON.Heightfield
+        (shape: any) => shape instanceof CANNON.Heightfield
       );
 
       if (isHeightfield) {
@@ -68,10 +82,12 @@ class FlightObject extends Entity {
     }
   }
 
-  getState() {
+  getState(): FlightObjectState {
     return {
       ...super.getState(),
-      type: 'flight-object'
+      type: 'flight-object',
+      velocity: this.body.velocity.toArray(),
+      isKilled: this.isKilled
     }
   }
 }

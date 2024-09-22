@@ -1,15 +1,24 @@
-import {EventEmitter} from "events";
 import { World } from "./entities/World";
 import HeightmapTerrain, { HeightmapTerrainProps } from "./entities/HeightmapTerrain";
+import TargetNPC, { TargetNPCState, type TargetNPCParams } from "./entities/TargetNPC";
+import TypedEmitter from "./utils/TypedEmitter";
+import { EntityState } from "./entities/Entity";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
 
 interface CoreParams {
     heightmapTerrain: HeightmapTerrainProps;
+    targetNPCs: TargetNPCParams[];
+}
+
+interface EventMap {
+    update_world_state: EntityState[];
+    kill_npc: TargetNPCState;
+    destroy_npc: TargetNPCState;
 }
 export class Core {
-    readonly eventEmitter = new EventEmitter();
+    readonly eventEmitter = new TypedEmitter<EventMap>();
     private gameWorld: World;
     private lastUpdateTime: number = Date.now();
 
@@ -37,6 +46,14 @@ export class Core {
         // ## TERRAIN ##
         const terrain = new HeightmapTerrain(params.heightmapTerrain);
         this.gameWorld.addEntity(terrain);
+
+        // ## NPCs ##
+        for (const npc of params.targetNPCs) {
+            const npcEntity = new TargetNPC(npc);
+            npcEntity.eventEmitter.on("kill", (d) => this.eventEmitter.emit("kill_npc", d));
+            npcEntity.eventEmitter.on("destroy", (d) => this.eventEmitter.emit("destroy_npc", d));
+            this.gameWorld.addEntity(npcEntity);
+        }
     }
 
     addAA() {

@@ -18,9 +18,13 @@
         <Sphere v-for="sphere in sphereEntities" :args="[sphere.radius]" :position="sphere.position"
             :quaternion="sphere.quaternion" :key="sphere.id" color="red" />
 
+        <TresGroup v-for="npc in targetNPCs" :position="npc.position" :quaternion="npc.quaternion" :key="npc.id">
+            <Cone :args="[npc.size / 3, npc.size, 32]" color="yellow" :rotation="[0, 0, -Math.PI / 2]" />
+        </TresGroup>
+
         <!-- Террейн -->
         <Suspense>
-            <GLTFModel path="/mars/scene.gltf" color="white"/>
+            <GLTFModel path="/mars/scene.gltf" color="white" />
         </Suspense>
 
 
@@ -32,14 +36,17 @@ import { TresCanvas } from '@tresjs/core'
 import { ref, onMounted } from 'vue';
 import { Core } from '../../../app/index'
 import { OrbitControls, Cone, GLTFModel, Sphere } from '@tresjs/cientos'
+import type { TargetNPCState } from '../../../app/entities/TargetNPC';
 
 const sphereEntities = ref<{
     id: string,
     position: [number, number, number],
     quaternion: [number, number, number, number],
     radius: number;
-    type: 'shere'
+    type: 'sphere'
 }[]>([])
+
+const targetNPCs = ref<TargetNPCState[]>([])
 
 async function initCore() {
 
@@ -51,12 +58,35 @@ async function initCore() {
             ],
             width: 8000,
             height: 8000
-        }
+        },
+        targetNPCs: [
+            {
+                id: 'test-1',
+                rcs: 100,
+                temperature: 20,
+                size: 10,
+                waypoints: [
+                    {
+                        speed: 50,
+                        position: { x: 0, y: 200, z: 0 }
+                    },
+                    {
+                        speed: 50,
+                        position: { x: 500, y: 200, z: 0 }
+                    },
+                    {
+                        speed: 50,
+                        position: { x: 500, y: 200, z: 500 }
+                    }
+                ]
+            }
+        ]
     })
 
-    setTimeout(() => core.collisionTest(), 2000)
-    core.eventEmitter.addListener('update_world_state', (data) => {
-        sphereEntities.value = data.filter(i => i.type === 'sphere')
+    // setTimeout(() => core.collisionTest(), 2000)
+    core.eventEmitter.on('update_world_state', (data) => {
+        sphereEntities.value = data.filter(i => i.type === 'sphere') as any[]
+        targetNPCs.value = data.filter(i => i.type === 'target-npc') as TargetNPCState[]
     })
 
 
