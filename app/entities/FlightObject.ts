@@ -4,7 +4,6 @@ import * as CANNON from "cannon-es";
 
 
 export interface FlightObjectState extends EntityState {
-  type: "flight-object" | string;
   velocity: [number, number, number];
   isKilled: boolean;
 }
@@ -24,6 +23,7 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
     super(id, body);
     this.velocity = velocity;
     this.isKilled = false;
+    this.type = 'flight-object';
     this.body.addEventListener("collide", (e: any) => this.onCollide(e));
   }
 
@@ -87,7 +87,6 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
   getState(): FlightObjectState {
     return {
       ...super.getState(),
-      type: 'flight-object',
       velocity: this.body.velocity.toArray(),
       isKilled: this.isKilled
     }

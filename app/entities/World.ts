@@ -18,6 +18,10 @@ export class World {
     return this.entities.find((entity) => entity.id === id);
   }
 
+  getEntitiesByType(type: string) {
+    return this.entities.filter((entity) => entity.type === type && !entity.isDestroyed);
+  }
+
   updateWorld(deltaTime: number) {
     this.cannonWorld.step(deltaTime);
     for (const entity of this.entities) {

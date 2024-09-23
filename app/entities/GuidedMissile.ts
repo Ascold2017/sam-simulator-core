@@ -16,7 +16,6 @@ export interface GuidedMissileProps {
 }
 
 export interface GuidedMissileState extends FlightObjectState {
-  type: "guided-missile";
   distanceTraveled: number;
   exploded: boolean;
 }
@@ -63,6 +62,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
     this.activeRange = props.activeRange;
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
+    this.type = "guided-missile";
 
     this.startPosition = new CANNON.Vec3(
       props.startPosition.x,
@@ -135,7 +135,6 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
   getState(): GuidedMissileState {
     return {
       ...super.getState(),
-      type: "guided-missile",
       distanceTraveled: this.distanceTraveled,
       exploded: this.exploded,
     };

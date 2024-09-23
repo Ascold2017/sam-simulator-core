@@ -18,7 +18,6 @@ export interface TargetNPCEvents extends FlightObjectEvents {
 }
 
 export interface TargetNPCState extends FlightObjectState {
-  type: "target-npc";
   rcs: number;
   temperature: number;
   size: number;
@@ -39,6 +38,7 @@ export default class TargetNPC extends FlightObject<TargetNPCEvents> {
     this.rcs = props.rcs;
     this.temperature = props.temperature;
     this.size = props.size;
+    this.type = "target-npc";
 
     // Устанавливаем начальный вектор скорости
     this.updateVelocity();
@@ -116,7 +116,6 @@ export default class TargetNPC extends FlightObject<TargetNPCEvents> {
   getState(): TargetNPCState {
     return {
       ...super.getState(),
-      type: "target-npc",
       rcs: this.rcs,
       temperature: this.temperature,
       size: this.size,

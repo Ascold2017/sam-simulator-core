@@ -17,6 +17,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
   id: string;
   body: CANNON.Body;
   isDestroyed: boolean;
+  type: string;
   readonly eventEmitter = new TypedEmitter<TEvents>();
 
   constructor(id: string, body: CANNON.Body) {
@@ -27,6 +28,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
     // @ts-ignore
     this.body.entityId = id;
     this.isDestroyed = false;
+    this.type = "entity";
   }
 
   update(deltaTime: number) {
@@ -50,7 +52,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
       position: this.body.position.toArray(),
       quaternion: this.body.quaternion.toArray(),
       isDestroyed: this.isDestroyed,
-      type: "entity",
+      type: this.type,
     };
   }
 }

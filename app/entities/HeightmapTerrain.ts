@@ -25,13 +25,14 @@ class HeightmapTerrain extends Entity {
       0,
       props.height / 2
     );
+
+    this.type = "heightmap";
   }
 
 
   getState() {
     return {
       ...super.getState(),
-      type: 'heightmap'
     }
   }
 }
