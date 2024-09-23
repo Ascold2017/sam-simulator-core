@@ -7,7 +7,7 @@ export interface EntityEvents {
 
 export interface EntityState {
   id: string;
-  position:[number, number, number];
+  position: [number, number, number];
   quaternion: [number, number, number, number];
   isDestroyed: boolean;
   type: string;
@@ -17,11 +17,15 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
   id: string;
   body: CANNON.Body;
   isDestroyed: boolean;
-  readonly eventEmitter = new TypedEmitter<TEvents>();;
+  readonly eventEmitter = new TypedEmitter<TEvents>();
 
   constructor(id: string, body: CANNON.Body) {
     this.id = id;
     this.body = body;
+    // @ts-ignore
+    body.isEntity = true;
+    // @ts-ignore
+    this.body.entityId = id;
     this.isDestroyed = false;
   }
 
@@ -35,7 +39,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
     this.body.velocity.set(0, 0, 0);
     this.body.angularVelocity.set(0, 0, 0);
     this.body.sleep();
-
+    console.log("Entity destroyed:", this.id);
     const state = this.getState();
     this.eventEmitter.emit("destroy", state);
   }

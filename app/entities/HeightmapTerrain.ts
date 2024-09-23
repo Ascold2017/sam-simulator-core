@@ -14,7 +14,8 @@ class HeightmapTerrain extends Entity {
       type: CANNON.Body.STATIC,
       shape: new CANNON.Heightfield(props.data, { elementSize: elementSize }),
     });
-
+    // @ts-ignore
+    body.isHeightmapTerrain = true;
     super("terrain", body);
 
     // ОБЯЗАТЕЛЬНО ПОВОРАЧИВАЕМ И СМЕЩАЕМ В ЦЕНТР!!!

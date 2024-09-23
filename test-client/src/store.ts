@@ -71,7 +71,6 @@ export const useStore = defineStore("my-store", () => {
 
     // Нормализуем вектор направления
     direction.normalize();
-
     core.eventEmitter.emit("update_aa_aim_ray", {
       aaId: myAAId.value,
       aimRay: [direction.x, direction.y, direction.z],

@@ -47,7 +47,7 @@ export default class TargetNPC extends FlightObject<TargetNPCEvents> {
   private static getBody(props: TargetNPCParams) {
     const initialPosition = props.waypoints[0].position;
 
-    return new CANNON.Body({
+    const body =  new CANNON.Body({
       mass: 5000,
       shape: new CANNON.Sphere(props.size),
       position: new CANNON.Vec3(
@@ -57,6 +57,10 @@ export default class TargetNPC extends FlightObject<TargetNPCEvents> {
       ),
       type: CANNON.Body.DYNAMIC,
     });
+
+    // @ts-ignore
+    body.isTargetNPC = true;
+    return body;
   }
 
   update(deltaTime: number) {

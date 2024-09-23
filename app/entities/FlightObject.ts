@@ -19,6 +19,8 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
   isKilled: boolean;
 
   constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3) {
+    // @ts-ignore
+    body.isFlightObject = true;
     super(id, body);
     this.velocity = velocity;
     this.isKilled = false;

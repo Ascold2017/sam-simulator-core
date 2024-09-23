@@ -37,10 +37,8 @@
         </TresGroup>
 
         <!-- Террейн -->
-        <Suspense>
-            <GLTFModel path="/mars/scene.gltf" color="white" />
-        </Suspense>
-
+        
+        <Plane :args="[1000, 1000]" color="black"/>
 
     </TresCanvas>
 </template>
@@ -48,7 +46,7 @@
 <script setup lang="ts">
 import { TresCanvas } from '@tresjs/core'
 import { ref, onMounted, reactive, onUnmounted } from 'vue';
-import { OrbitControls, Cone, GLTFModel, Sphere, Line2 } from '@tresjs/cientos'
+import { OrbitControls, Cone, GLTFModel, Sphere, Line2, Plane } from '@tresjs/cientos'
 import { useStore } from '@/store';
 
 const store = useStore();

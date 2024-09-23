@@ -70,7 +70,7 @@ export class AA extends Entity<AAEvents> {
         z: this.body.position.z,
       },
       ...this.ammoProps,
-    });
+    }, this.gameWorld);
 
     missile.eventEmitter.on("destroy", () => {
       this.launched = this.launched.filter((missile) => missile.id !== missile.id);

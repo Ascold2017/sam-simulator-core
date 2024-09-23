@@ -3,7 +3,7 @@ import FlightObject, {
   FlightObjectEvents,
   FlightObjectState,
 } from "./FlightObject";
-
+import { World } from "./World";
 export interface GuidedMissileProps {
   id: string;
   startPosition: { x: number; y: number; z: number };
@@ -37,9 +37,11 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
   private distanceTraveled: number = 0;
   private exploded: boolean = false;
   private fuseEnabled: boolean = false;
+  private startPosition: CANNON.Vec3;
+  private gameWorld: World;
   aimRay = new CANNON.Vec3(0, 0, 0);
 
-  constructor(props: GuidedMissileProps) {
+  constructor(props: GuidedMissileProps, gameWorld: World) {
     const body = new CANNON.Body({
       mass: 100,
       shape: new CANNON.Sphere(props.killRadius),
@@ -61,6 +63,13 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
     this.activeRange = props.activeRange;
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
+
+    this.startPosition = new CANNON.Vec3(
+      props.startPosition.x,
+      props.startPosition.y,
+      props.startPosition.z
+    );
+    this.gameWorld = gameWorld;
 
     this.body.addEventListener("collide", (e: any) => this.onCollide(e));
   }
@@ -96,46 +105,22 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
 
   // Корректировка траектории полета ракеты
   private adjustTrajectory(deltaTime: number) {
-    const aimRay = this.aimRay.clone();
-    const velocity = this.body.velocity.clone();
-    // Направление к цели (aimRay)
-    const directionToAim = aimRay.vsub(this.body.position);
-    directionToAim.normalize();
-
-    const currentDirection = velocity;
-    currentDirection.normalize();
-
-    // Ограничение маневра максимальной перегрузкой (maxOverload)
-    const steeringForce = directionToAim
-      .vsub(currentDirection)
-      .scale(this.maxOverload * deltaTime);
-    this.body.velocity = this.body.velocity.vadd(steeringForce);
-
-    // Ограничиваем скорость ракет максимальной скоростью
-    if (this.body.velocity.length() > this.maxVelocity) {
-      this.body.velocity.normalize();
-      this.body.velocity.scale(this.maxVelocity);
-    }
+    this.velocity = this.aimRay.scale(this.maxVelocity);
   }
 
   private onCollide(event: any) {
-    if (!this.fuseEnabled) return; // Игнорируем столкновения до активации
+    if (!this.fuseEnabled) return;
 
-    const targetBody = event.body; // Объект, с которым произошло столкновение
+    const targetBody = event.body;
 
-    console.log("Missile collided with:", targetBody);
     // Проверяем, если столкновение произошло с объектом типа FlightObject
-    if (targetBody.userData && targetBody.userData instanceof FlightObject) {
-      const target = targetBody.userData as FlightObject;
-
-      // Проверяем радиус поражения
-      const distanceToTarget = this.body.position.distanceTo(
-        target.body.position
-      );
-      if (distanceToTarget <= this.killRadius) {
-        target.kill(); // Уничтожаем цель
-        this.explode(); // Взрываем ракету
-      }
+    if (targetBody.isFlightObject) {
+      const target = this.gameWorld.getEntityById(
+        targetBody.entityId
+      ) as FlightObject;
+      console.log("Missile collided with:", target);
+      target.kill(); // Уничтожаем цель
+      this.explode(); // Взрываем ракету
     }
   }
 
