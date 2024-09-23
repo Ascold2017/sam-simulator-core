@@ -40,6 +40,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
     this.body.mass = 0;
     this.body.velocity.set(0, 0, 0);
     this.body.angularVelocity.set(0, 0, 0);
+    this.body.collisionResponse = false;
     this.body.sleep();
     console.log("Entity destroyed:", this.id);
     const state = this.getState();
