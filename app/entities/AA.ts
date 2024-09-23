@@ -12,7 +12,6 @@ export interface AAProps {
   position: { x: number; y: number; z: number };
   radarProps: {
     range: number;
-    sensitivity: number;
   };
   type: "guided-missile";
   ammoCount: number;
@@ -22,6 +21,7 @@ export interface AAProps {
 export interface AAState extends EntityState {
   ammoCount: number;
   aimRay: [number, number, number];
+  launchedMissileIds: string[];
   detectedTargetIds: string[];
 }
 
@@ -131,6 +131,7 @@ export class AA extends Entity<AAEvents> {
       ...super.getState(),
       ammoCount: this.ammoCount,
       aimRay: this.aimRay.toArray(),
+      launchedMissileIds: this.launched.map((missile) => missile.id),
       detectedTargetIds: this.detectedTargetIds,
     };
   }

@@ -1,11 +1,7 @@
 import { defineStore } from "pinia";
-import { Core } from "../../app";
+import { Core, type TargetNPCState, type AAState, type GuidedMissileState, type EntityState } from "../../app";
 import { data } from "./assets/coreData";
 import { computed, ref } from "vue";
-import type { TargetNPCState } from "../../app/entities/TargetNPC";
-import type { AAState } from "../../app/entities/AA";
-import type { GuidedMissileState } from "../../app/entities/GuidedMissile";
-import type { EntityState } from "../../app/entities/Entity";
 import * as THREE from "three";
 
 export const useStore = defineStore("my-store", () => {
@@ -37,7 +33,9 @@ export const useStore = defineStore("my-store", () => {
     position: { x: 100, y: 200, z: 50 },
     type: "guided-missile",
     ammoCount: 16,
-    radarProps: {},
+    radarProps: {
+      range: 16000
+    },
     ammoProps: {
       activeRange: 6000,
       maxRange: 10000,
