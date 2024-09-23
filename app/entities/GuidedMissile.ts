@@ -25,7 +25,7 @@ export interface GuidedMissileEvents extends FlightObjectEvents {
   kill: GuidedMissileState;
   explode: GuidedMissileState;
 }
-
+// @ts-ignore
 export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
   private maxVelocity: number;
   private minRange: number;
@@ -70,7 +70,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
       props.startPosition.z
     );
     this.gameWorld = gameWorld;
-
+    
     this.body.addEventListener("collide", (e: any) => this.onCollide(e));
   }
 
