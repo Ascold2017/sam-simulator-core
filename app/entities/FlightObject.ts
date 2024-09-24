@@ -45,7 +45,7 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
     this.eventEmitter.emit("kill", this.getState());
   }
 
-  private onCollide(e: any) {
+  protected onCollide(e: any) {
     const targetBody = e.body; // объект, с которым произошло столкновение
     if (targetBody && targetBody.shapes.length > 0) {
       // Проверяем, является ли объект землей (Heightfield)
@@ -56,6 +56,7 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
       if (isHeightfield) {
         console.log("FlightObject collided with the ground:", this.id);
         this.destroy();
+        return;
       }
     }
   }

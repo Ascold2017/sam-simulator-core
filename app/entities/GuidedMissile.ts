@@ -109,6 +109,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
   }
 
   private onCollide(event: any) {
+    super.onCollide(event);
     if (!this.fuseEnabled) return;
 
     const targetBody = event.body;
