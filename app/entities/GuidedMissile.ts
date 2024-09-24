@@ -118,7 +118,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
       const target = this.gameWorld.getEntityById(
         targetBody.entityId
       ) as FlightObject;
-      console.log("Missile collided with:", target);
+      console.log("Missile collided with:", target.id);
       target.kill(); // Уничтожаем цель
       this.explode(); // Взрываем ракету
     }
