@@ -63,6 +63,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
     this.type = "guided-missile";
+   
 
     this.startPosition = new CANNON.Vec3(
       props.startPosition.x,
@@ -70,8 +71,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
       props.startPosition.z
     );
     this.gameWorld = gameWorld;
-    
-    this.body.addEventListener("collide", (e: any) => this.onCollide(e));
+    this.body.addEventListener("collide", this.onCollide.bind(this));
   }
 
   update(deltaTime: number) {
@@ -131,6 +131,12 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
     this.exploded = true;
     this.eventEmitter.emit("explode", this.getState());
     this.destroy(); // Вызов destroy для удаления ракеты
+   
+  }
+
+  private destroy() {
+    super.destroy();
+    this.body.removeEventListener('collide',  this.onCollide.bind(this));
   }
 
   getState(): GuidedMissileState {
