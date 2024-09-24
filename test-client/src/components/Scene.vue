@@ -37,8 +37,9 @@
         </TresGroup>
 
         <!-- Террейн -->
-        
-        <Plane :args="[1000, 1000]" color="black"/>
+         <Suspense>
+            <GLTFModel path="/mars/scene.gltf" />
+        </Suspense>
 
     </TresCanvas>
 </template>

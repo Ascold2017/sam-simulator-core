@@ -7,6 +7,10 @@ import * as THREE from "three";
 export const useStore = defineStore("my-store", () => {
   const core = new Core(data);
 
+  setTimeout(() => {
+    core.collisionTest()
+  }, 3000)
+
   const myAAId = ref("aa-01");
 
   const spheres = ref<EntityState[]>([]);

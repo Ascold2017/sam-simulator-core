@@ -9,10 +9,11 @@ export interface HeightmapTerrainProps {
 class HeightmapTerrain extends Entity {
   constructor(props: HeightmapTerrainProps) {
     const elementSize = props.width / (props.data.length -1);
+    const adjustedData = props.data.reverse().map(row => row);
     const body = new CANNON.Body({
       mass: 0,
       type: CANNON.Body.STATIC,
-      shape: new CANNON.Heightfield(props.data, { elementSize: elementSize }),
+      shape: new CANNON.Heightfield(adjustedData, { elementSize: elementSize }),
     });
     // @ts-ignore
     body.isHeightmapTerrain = true;
@@ -21,9 +22,9 @@ class HeightmapTerrain extends Entity {
     // ОБЯЗАТЕЛЬНО ПОВОРАЧИВАЕМ И СМЕЩАЕМ В ЦЕНТР!!!
     this.body.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
     this.body.position.set(
-      -props.width / 2,
+      -props.width / 2 + elementSize / 2,
       0,
-      props.height / 2
+      props.height / 2,
     );
 
     this.type = "heightmap";
