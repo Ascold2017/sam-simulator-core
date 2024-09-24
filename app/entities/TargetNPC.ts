@@ -10,6 +10,7 @@ export interface TargetNPCParams {
     speed: number;
     position: { x: number; y: number; z: number };
   }[];
+  entityId: number;
 }
 
 export interface TargetNPCEvents extends FlightObjectEvents {
@@ -30,9 +31,10 @@ export default class TargetNPC extends FlightObject<TargetNPCEvents> {
   private size: number;
   private currentWaypointIndex: number = 0;
   private reachedEnd: boolean = false;
+  private entityData: any;
 
   constructor(props: TargetNPCParams) {
-    super(props.id, TargetNPC.getBody(props), new CANNON.Vec3(0, 0, 0));
+    super(props.id, TargetNPC.getBody(props), new CANNON.Vec3(0, 0, 0), props.entityId);
 
     this.waypoints = props.waypoints;
     this.rcs = props.rcs;

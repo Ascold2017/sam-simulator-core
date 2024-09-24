@@ -17,10 +17,10 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
   velocity: CANNON.Vec3;
   isKilled: boolean;
 
-  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3) {
+  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3, entityId?: number) {
     // @ts-ignore
     body.isFlightObject = true;
-    super(id, body);
+    super(id, body, entityId);
     this.velocity = velocity;
     this.isKilled = false;
     this.type = 'flight-object';

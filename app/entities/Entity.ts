@@ -11,6 +11,7 @@ export interface EntityState {
   quaternion: [number, number, number, number];
   isDestroyed: boolean;
   type: string;
+  entityId: number | null;
 }
 
 class Entity<TEvents extends EntityEvents = EntityEvents> {
@@ -18,9 +19,10 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
   body: CANNON.Body;
   isDestroyed: boolean;
   type: string;
+  entityId: number | null;
   readonly eventEmitter = new TypedEmitter<TEvents>();
 
-  constructor(id: string, body: CANNON.Body) {
+  constructor(id: string, body: CANNON.Body, entityId?: number) {
     this.id = id;
     this.body = body;
     // @ts-ignore
@@ -29,6 +31,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
     this.body.entityId = id;
     this.isDestroyed = false;
     this.type = "entity";
+    this.entityId = entityId || null;
   }
 
   update(deltaTime: number) {
@@ -54,6 +57,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
       quaternion: this.body.quaternion.toArray(),
       isDestroyed: this.isDestroyed,
       type: this.type,
+      entityId: this.entityId
     };
   }
 }
