@@ -1,9 +1,9 @@
 import Entity, { EntityEvents, EntityState } from "./Entity";
 import * as CANNON from "cannon-es";
-import GuidedMissile, {
-  GuidedMissileProps,
-  GuidedMissileState,
-} from "./GuidedMissile";
+import Missile, {
+  MissileProps,
+  MissileState,
+} from "./Missile";
 import { World } from "./World";
 import TargetNPC from "./TargetNPC";
 
@@ -13,13 +13,14 @@ export interface AAProps {
   radarProps: {
     range: number;
   };
-  type: "guided-missile";
-  ammoCount: number;
-  ammoProps: Omit<GuidedMissileProps, "id" | "startPosition">;
+  reloadTime: number;
+  missileCount: number;
+  missileProps: Omit<MissileProps, "id" | "startPosition">;
 }
 
 export interface AAState extends EntityState {
   ammoCount: number;
+  readyToFire: boolean;
   aimRay: [number, number, number];
   launchedMissileIds: string[];
   detectedTargetIds: string[];
@@ -27,17 +28,19 @@ export interface AAState extends EntityState {
 
 export interface AAEvents extends EntityEvents {
   destroy: EntityState;
-  launch_missile: GuidedMissileState;
+  launch_missile: MissileState;
 }
 
 export class AA extends Entity<AAEvents> {
   private radarProps: AAProps["radarProps"];
-  private ammoProps: Omit<GuidedMissileProps, "id" | "startPosition">;
-  private ammoCount: number;
-  private launched: GuidedMissile[] = [];
+  private missileProps: Omit<MissileProps, "id" | "startPosition">;
+  private missileCount: number;
+  private launched: Missile[] = [];
   private aimRay = new CANNON.Vec3(1, 1, 1);
   private detectedTargetIds: string[] = [];
   private gameWorld: World;
+  private reloadTime: number;
+  private lastTimeFired = Date.now();
 
   constructor(props: AAProps, gameWorld: World) {
     const body = new CANNON.Body({
@@ -53,11 +56,11 @@ export class AA extends Entity<AAEvents> {
     super(props.id, body);
 
     this.radarProps = props.radarProps;
-    this.type = props.type;
-    this.ammoProps = props.ammoProps;
-    this.ammoCount = props.ammoCount;
+    this.missileProps = props.missileProps;
+    this.missileCount = props.missileCount;
     this.type = "aa";
     this.gameWorld = gameWorld;
+    this.reloadTime = props.reloadTime;
   }
 
   update(deltaTime: number) {
@@ -70,8 +73,10 @@ export class AA extends Entity<AAEvents> {
   }
 
   fire() {
-    if (!this.body.world || this.ammoCount <= 0) return;
-    const missile = new GuidedMissile(
+    const now = Date.now();
+    if (now - this.lastTimeFired < this.reloadTime * 1000) return;
+    if (!this.body.world || this.missileCount <= 0) return;
+    const missile = new Missile(
       {
         id: `${this.id}-missile-${this.launched.length + 1}`,
         startPosition: {
@@ -79,7 +84,7 @@ export class AA extends Entity<AAEvents> {
           y: this.body.position.y,
           z: this.body.position.z,
         },
-        ...this.ammoProps,
+        ...this.missileProps,
       },
       this.gameWorld
     );
@@ -94,7 +99,7 @@ export class AA extends Entity<AAEvents> {
 
     this.launched.push(missile);
     this.gameWorld.addEntity(missile);
-    this.ammoCount--;
+    this.missileCount--;
   }
 
   updateAimRay(aimRay: [number, number, number]) {
@@ -129,8 +134,9 @@ export class AA extends Entity<AAEvents> {
   getState(): AAState {
     return {
       ...super.getState(),
-      ammoCount: this.ammoCount,
+      ammoCount: this.missileCount,
       aimRay: this.aimRay.toArray(),
+      readyToFire: Date.now() - this.lastTimeFired > this.reloadTime * 1000,
       launchedMissileIds: this.launched.map((missile) => missile.id),
       detectedTargetIds: this.detectedTargetIds,
     };

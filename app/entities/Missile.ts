@@ -4,29 +4,27 @@ import FlightObject, {
   FlightObjectState,
 } from "./FlightObject";
 import { World } from "./World";
-export interface GuidedMissileProps {
+export interface MissileProps {
   id: string;
   startPosition: { x: number; y: number; z: number };
   maxVelocity: number;
   minRange: number;
   maxRange: number;
-  activeRange: number;
   killRadius: number;
   maxOverload: number;
 }
 
-export interface GuidedMissileState extends FlightObjectState {
-  distanceTraveled: number;
+export interface MissileState extends FlightObjectState {
   exploded: boolean;
 }
 
-export interface GuidedMissileEvents extends FlightObjectEvents {
-  destroy: GuidedMissileState;
-  kill: GuidedMissileState;
-  explode: GuidedMissileState;
+export interface MissileEvents extends FlightObjectEvents {
+  destroy: MissileState;
+  kill: MissileState;
+  explode: MissileState;
 }
 // @ts-ignore
-export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
+export default class Missile extends FlightObject<GuidedMissileEvents> {
   private maxVelocity: number;
   private minRange: number;
   private maxRange: number;
@@ -40,7 +38,7 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
   private gameWorld: World;
   aimRay = new CANNON.Vec3(0, 0, 0);
 
-  constructor(props: GuidedMissileProps, gameWorld: World) {
+  constructor(props: MissileProps, gameWorld: World) {
     const body = new CANNON.Body({
       mass: 100,
       shape: new CANNON.Sphere(props.killRadius),
@@ -59,10 +57,10 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
     this.maxVelocity = props.maxVelocity;
     this.minRange = props.minRange;
     this.maxRange = props.maxRange;
-    this.activeRange = props.activeRange;
+    this.activeRange = props.maxRange * 0.5;
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
-    this.type = "guided-missile";
+    this.type = "missile";
    
 
     this.startPosition = new CANNON.Vec3(
@@ -134,15 +132,14 @@ export default class GuidedMissile extends FlightObject<GuidedMissileEvents> {
    
   }
 
-  private destroy() {
+   destroy() {
     super.destroy();
     this.body.removeEventListener('collide',  this.onCollide.bind(this));
   }
 
-  getState(): GuidedMissileState {
+  getState(): MissileState {
     return {
       ...super.getState(),
-      distanceTraveled: this.distanceTraveled,
       exploded: this.exploded,
     };
   }
