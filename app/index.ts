@@ -1,11 +1,10 @@
 export { Core, type CoreEventMap, type CoreParams } from "./core";
 
-export type { BaseAAProps, BaseAAState } from "./entities/AA/BaseAA";
+export type { AAProps, AAState } from "./entities/AA";
+
+export type { MissileProps, MissileState } from "./entities/Missile";
 
 export type { TargetNPCParams, TargetNPCState } from "./entities/TargetNPC";
-
-export type { BaseAmmoProps, BaseAmmoState } from "./entities/Ammo/BaseAmmo";
-export type { BulletProps, BulletState } from './entities/Ammo/Bullet';
 
 export type { HeightmapTerrainProps } from "./entities/HeightmapTerrain";
 
