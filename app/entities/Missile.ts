@@ -84,12 +84,13 @@ export default class Missile extends FlightObject<MissileEvents> {
     const target = this.gameWorld.getEntityById(this.targetId) as FlightObject;
 
     if (!target) {
+      console.log(`Missile ${this.id} lost target!`);
       this.eventEmitter.emit('target_lost', this.getState());
       this.explode();
       return;
     }
-
-    if (this.overload >= this.maxOverload) {
+    if (this.fuseEnabled && this.overload >= this.maxOverload) {
+      console.log(`Missile ${this.id} overloaded!`);
       this.eventEmitter.emit('overloaded', this.getState());
       this.explode();
       return;
@@ -107,6 +108,7 @@ export default class Missile extends FlightObject<MissileEvents> {
 
     // Проверяем, достигла ли ракета своей максимальной дальности
     if (this.distanceTraveled >= this.maxRange) {
+      console.log(`Missile ${this.id} out of range!`);
       this.explode();
       this.eventEmitter.emit('over_distance', this.getState());
       return;

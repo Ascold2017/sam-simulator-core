@@ -13,6 +13,7 @@ export interface AAProps {
   };
   reloadTime: number;
   missileCount: number;
+  missileChannelCount: number;
   missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
 }
 
@@ -38,6 +39,7 @@ export class AA extends Entity<AAEvents> {
   private radarProps: AAProps["radarProps"];
   private missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
   private missileCount: number;
+  private missileChannelCount: number;
   private launched: Missile[] = [];
   private aimRay = new CANNON.Vec3(1, 1, 1);
   private detectedTargetIds: string[] = [];
@@ -62,6 +64,7 @@ export class AA extends Entity<AAEvents> {
     this.radarProps = props.radarProps;
     this.missileProps = props.missileProps;
     this.missileCount = props.missileCount;
+    this.missileChannelCount = props.missileChannelCount;
     this.type = "aa";
     this.gameWorld = gameWorld;
     this.reloadTime = props.reloadTime;
@@ -76,7 +79,7 @@ export class AA extends Entity<AAEvents> {
   }
 
   fire() {
-    if (!this.capturedTargetId) return;
+    if (!this.capturedTargetId || this.missileCount <= 0) return;
     const now = Date.now();
     if (now - this.lastTimeFired < this.reloadTime * 1000) return;
     if (!this.body.world || this.missileCount <= 0) return;
@@ -98,6 +101,7 @@ export class AA extends Entity<AAEvents> {
       this.launched = this.launched.filter(
         (missile) => missile.id !== missile.id
       );
+      this.missileCount++;
     });
 
     missile.eventEmitter.on("overloaded", (state) => {
@@ -113,6 +117,8 @@ export class AA extends Entity<AAEvents> {
     this.launched.push(missile);
     this.gameWorld.addEntity(missile);
     this.missileCount--;
+    this.missileChannelCount--;
+    this.lastTimeFired = now;
   }
 
   captureTarget() {
