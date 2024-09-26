@@ -8,7 +8,8 @@ import TargetNPC, {
 } from "./entities/TargetNPC";
 import TypedEmitter from "./utils/TypedEmitter";
 import { EntityState } from "./entities/Entity";
-import { AA, type AAProps } from "./entities/AA";
+import { AA, AAState, type AAProps } from "./entities/AA";
+import { MissileState } from "./entities/Missile";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -20,8 +21,12 @@ export interface CoreParams {
 
 export interface CoreEventMap {
   update_world_state: EntityState[];
-  kill_npc: TargetNPCState;
-  destroy_npc: TargetNPCState;
+  target_killed: TargetNPCState;
+  target_destroyed: TargetNPCState;
+  target_captured: AAState;
+  target_resetted: AAState;
+  missile_launched: MissileState;
+  
 }
 export class Core {
   readonly eventEmitter = new TypedEmitter<CoreEventMap>();
@@ -57,10 +62,10 @@ export class Core {
     for (const npc of params.targetNPCs) {
       const npcEntity = new TargetNPC(npc);
       npcEntity.eventEmitter.on("kill", (d) =>
-        this.eventEmitter.emit("kill_npc", d)
+        this.eventEmitter.emit("target_killed", d)
       );
       npcEntity.eventEmitter.on("destroy", (d) =>
-        this.eventEmitter.emit("destroy_npc", d)
+        this.eventEmitter.emit("target_destroyed", d)
       );
       this.gameWorld.addEntity(npcEntity);
     }
@@ -68,6 +73,17 @@ export class Core {
 
   addAA(props: AAProps) {
     const aa = new AA(props, this.gameWorld);
+    aa.eventEmitter.on('launch_missile', (MissileState) => {
+      this.eventEmitter.emit('missile_launched', MissileState)
+    })
+
+    aa.eventEmitter.on('target_captured', (AAState) => {
+      this.eventEmitter.emit('target_captured', AAState)
+    })
+
+    aa.eventEmitter.on('target_resetted', (AAState) => {
+      this.eventEmitter.emit('target_resetted', AAState)
+    })
 
     this.gameWorld.addEntity(aa);
   }
@@ -88,5 +104,15 @@ export class Core {
   fireAA(aaId: string) {
     const aa = this.gameWorld.getEntityById(aaId) as AA;
     aa?.fire();
+  }
+
+  captureTarget(aaId: string) {
+    const aa = this.gameWorld.getEntityById(aaId) as AA;
+    aa?.captureTarget();
+  }
+
+  resetTarget(aaId: string) {
+    const aa = this.gameWorld.getEntityById(aaId) as AA;
+    aa?.resetTarget();
   }
 }

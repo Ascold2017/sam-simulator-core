@@ -12,6 +12,7 @@ export interface AAProps {
   position: { x: number; y: number; z: number };
   radarProps: {
     range: number;
+    captureAngle: number;
   };
   reloadTime: number;
   missileCount: number;
@@ -22,6 +23,7 @@ export interface AAState extends EntityState {
   ammoCount: number;
   readyToFire: boolean;
   aimRay: [number, number, number];
+  capturedTargetId: string | null;
   launchedMissileIds: string[];
   detectedTargetIds: string[];
 }
@@ -29,6 +31,8 @@ export interface AAState extends EntityState {
 export interface AAEvents extends EntityEvents {
   destroy: EntityState;
   launch_missile: MissileState;
+  target_captured: AAState;
+  target_resetted: AAState;
 }
 
 export class AA extends Entity<AAEvents> {
@@ -38,6 +42,7 @@ export class AA extends Entity<AAEvents> {
   private launched: Missile[] = [];
   private aimRay = new CANNON.Vec3(1, 1, 1);
   private detectedTargetIds: string[] = [];
+  private capturedTargetId: string | null = null;
   private gameWorld: World;
   private reloadTime: number;
   private lastTimeFired = Date.now();
@@ -102,11 +107,48 @@ export class AA extends Entity<AAEvents> {
     this.missileCount--;
   }
 
-  updateAimRay(aimRay: [number, number, number]) {
-    this.aimRay = new CANNON.Vec3(aimRay[0], aimRay[1], aimRay[2]);
+  captureTarget() {
+    // Угол раствора сектора (в радианах)
+    const halfCaptureAngle = this.radarProps.captureAngle / 2;
+
+    // Позиция зенитки
+    const aaPosition = this.body.position;
+
+    // Проверяем каждую обнаруженную цель
+    for (const targetId of this.detectedTargetIds) {
+        const target = this.gameWorld.getEntityById(targetId) as TargetNPC;
+        if (!target) continue;
+
+        // Вектор от зенитки к цели
+        const directionToTarget = target.body.position.vsub(aaPosition)
+        directionToTarget.normalize();
+
+        // Угол между aimRay и вектором на цель
+        const aimRayNormalized = this.aimRay.clone();
+        const angleToTarget = Math.acos(directionToTarget.dot(aimRayNormalized));
+
+        // Если цель находится в секторе захвата (менее половины captureAngle)
+        if (angleToTarget <= halfCaptureAngle) {
+            // Захватываем цель
+            this.capturedTargetId = target.id;
+            console.log(`Target captured: ${target.id}`);
+            this.eventEmitter.emit('target_captured', this.getState());
+            break; // Захватываем первую подходящую цель
+        }
+    }
   }
 
-  updateRadar() {
+  resetTarget() {
+    this.capturedTargetId = null;
+    this.eventEmitter.emit('target_resetted', this.getState());
+  }
+
+  updateAimRay(aimRay: [number, number, number]) {
+    this.aimRay = new CANNON.Vec3(aimRay[0], aimRay[1], aimRay[2])
+    this.aimRay.normalize();
+  }
+
+  private updateRadar() {
     this.detectedTargetIds = [];
     this.gameWorld.getEntitiesByType("target-npc").forEach((t) => {
       const target = t as TargetNPC;
@@ -129,6 +171,10 @@ export class AA extends Entity<AAEvents> {
         }
       }
     });
+
+    if (this.capturedTargetId &&this.detectedTargetIds.includes(this.capturedTargetId)) {
+      this.resetTarget()
+    }
   }
 
   getState(): AAState {
@@ -139,6 +185,7 @@ export class AA extends Entity<AAEvents> {
       readyToFire: Date.now() - this.lastTimeFired > this.reloadTime * 1000,
       launchedMissileIds: this.launched.map((missile) => missile.id),
       detectedTargetIds: this.detectedTargetIds,
+      capturedTargetId: this.capturedTargetId,
     };
   }
 }
