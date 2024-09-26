@@ -172,7 +172,7 @@ export class AA extends Entity<AAEvents> {
       }
     });
 
-    if (this.capturedTargetId &&this.detectedTargetIds.includes(this.capturedTargetId)) {
+    if (this.capturedTargetId && !this.detectedTargetIds.includes(this.capturedTargetId)) {
       this.resetTarget()
     }
   }
