@@ -1,8 +1,6 @@
 import Entity, { EntityState, type EntityEvents } from "./Entity";
 import * as CANNON from "cannon-es";
 
-
-
 export interface FlightObjectState extends EntityState {
   velocity: [number, number, number];
   isKilled: boolean;
@@ -13,22 +11,40 @@ export interface FlightObjectEvents extends EntityEvents {
   destroy: FlightObjectState;
 }
 
-class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> extends Entity<TEvents> {
+class FlightObject<
+  TEvents extends FlightObjectEvents = FlightObjectEvents
+> extends Entity<TEvents> {
   velocity: CANNON.Vec3;
   isKilled: boolean;
+  private previousVelocity: CANNON.Vec3 = new CANNON.Vec3(); // Предыдущая скорость
+  overload: number = 0;
 
-  constructor(id: string, body: CANNON.Body, velocity: CANNON.Vec3, entityId?: number) {
+  constructor(
+    id: string,
+    body: CANNON.Body,
+    velocity: CANNON.Vec3,
+    entityId?: number
+  ) {
     // @ts-ignore
     body.isFlightObject = true;
     super(id, body, entityId);
     this.velocity = velocity;
     this.isKilled = false;
-    this.type = 'flight-object';
+    this.type = "flight-object";
     this.body.addEventListener("collide", (e: any) => this.onCollide(e));
   }
 
   update(deltaTime: number) {
     super.update(deltaTime);
+
+    // Вычисляем ускорение: (текущая скорость - предыдущая скорость) / deltaTime
+    const currentVelocity = this.velocity.clone();
+    const acceleration = currentVelocity.vsub(this.previousVelocity);
+
+    this.overload = acceleration.scale(1/deltaTime).length() / 9.81;
+
+    // Сохраняем текущую скорость как предыдущую для следующего кадра
+    this.previousVelocity.copy(currentVelocity);
 
     if (this.isKilled) {
       // Применяем гравитацию
@@ -89,8 +105,8 @@ class FlightObject<TEvents extends FlightObjectEvents = FlightObjectEvents> exte
     return {
       ...super.getState(),
       velocity: this.body.velocity.toArray(),
-      isKilled: this.isKilled
-    }
+      isKilled: this.isKilled,
+    };
   }
 }
 

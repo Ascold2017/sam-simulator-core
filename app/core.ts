@@ -26,7 +26,8 @@ export interface CoreEventMap {
   target_captured: AAState;
   target_resetted: AAState;
   missile_launched: MissileState;
-  
+  missile_overloaded: MissileState;
+  missile_over_distance: MissileState;
 }
 export class Core {
   readonly eventEmitter = new TypedEmitter<CoreEventMap>();
@@ -73,17 +74,25 @@ export class Core {
 
   addAA(props: AAProps) {
     const aa = new AA(props, this.gameWorld);
-    aa.eventEmitter.on('launch_missile', (MissileState) => {
-      this.eventEmitter.emit('missile_launched', MissileState)
-    })
+    aa.eventEmitter.on("launch_missile", (MissileState) => {
+      this.eventEmitter.emit("missile_launched", MissileState);
+    });
 
-    aa.eventEmitter.on('target_captured', (AAState) => {
-      this.eventEmitter.emit('target_captured', AAState)
-    })
+    aa.eventEmitter.on("target_captured", (AAState) => {
+      this.eventEmitter.emit("target_captured", AAState);
+    });
 
-    aa.eventEmitter.on('target_resetted', (AAState) => {
-      this.eventEmitter.emit('target_resetted', AAState)
-    })
+    aa.eventEmitter.on("target_resetted", (AAState) => {
+      this.eventEmitter.emit("target_resetted", AAState);
+    });
+
+    aa.eventEmitter.on("missile_overloaded", (MissileState) => {
+      this.eventEmitter.emit("missile_overloaded", MissileState);
+    });
+
+    aa.eventEmitter.on("missile_over_distance", (MissileState) => {
+      this.eventEmitter.emit("missile_over_distance", MissileState);
+    });
 
     this.gameWorld.addEntity(aa);
   }

@@ -12,6 +12,7 @@ export interface MissileProps {
   maxRange: number;
   killRadius: number;
   maxOverload: number;
+  targetId: string;
 }
 
 export interface MissileState extends FlightObjectState {
@@ -22,9 +23,12 @@ export interface MissileEvents extends FlightObjectEvents {
   destroy: MissileState;
   kill: MissileState;
   explode: MissileState;
+  target_lost: MissileState;
+  overloaded: MissileState;
+  over_distance: MissileState;
 }
 // @ts-ignore
-export default class Missile extends FlightObject<GuidedMissileEvents> {
+export default class Missile extends FlightObject<MissileEvents> {
   private maxVelocity: number;
   private minRange: number;
   private maxRange: number;
@@ -36,7 +40,7 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
   private fuseEnabled: boolean = false;
   private startPosition: CANNON.Vec3;
   private gameWorld: World;
-  aimRay = new CANNON.Vec3(0, 0, 0);
+  private targetId: string;
 
   constructor(props: MissileProps, gameWorld: World) {
     const body = new CANNON.Body({
@@ -54,6 +58,7 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
 
     super(props.id, body, new CANNON.Vec3(0, 0, 0));
 
+    this.targetId = props.targetId;
     this.maxVelocity = props.maxVelocity;
     this.minRange = props.minRange;
     this.maxRange = props.maxRange;
@@ -61,7 +66,6 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
     this.type = "missile";
-   
 
     this.startPosition = new CANNON.Vec3(
       props.startPosition.x,
@@ -77,6 +81,20 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
 
     if (this.exploded || this.isDestroyed || this.isKilled) return;
 
+    const target = this.gameWorld.getEntityById(this.targetId) as FlightObject;
+
+    if (!target) {
+      this.eventEmitter.emit('target_lost', this.getState());
+      this.explode();
+      return;
+    }
+
+    if (this.overload >= this.maxOverload) {
+      this.eventEmitter.emit('overloaded', this.getState());
+      this.explode();
+      return;
+    }
+
     // Рассчитываем пройденное расстояние
     this.distanceTraveled += this.body.velocity.length() * deltaTime;
 
@@ -90,6 +108,7 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
     // Проверяем, достигла ли ракета своей максимальной дальности
     if (this.distanceTraveled >= this.maxRange) {
       this.explode();
+      this.eventEmitter.emit('over_distance', this.getState());
       return;
     }
 
@@ -98,12 +117,14 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
       this.body.velocity.scale(0.98); // Уменьшаем скорость
     }
 
-    this.adjustTrajectory(deltaTime);
+    this.adjustTrajectory(target);
   }
 
   // Корректировка траектории полета ракеты
-  private adjustTrajectory(deltaTime: number) {
-    this.velocity = this.aimRay.scale(this.maxVelocity);
+  private adjustTrajectory(target: FlightObject) {
+    const directionToTarget = target.body.position.vsub(this.body.position);
+    directionToTarget.normalize();
+    this.velocity = directionToTarget.scale(this.maxVelocity);
   }
 
   private onCollide(event: any) {
@@ -129,12 +150,11 @@ export default class Missile extends FlightObject<GuidedMissileEvents> {
     this.exploded = true;
     this.eventEmitter.emit("explode", this.getState());
     this.destroy(); // Вызов destroy для удаления ракеты
-   
   }
 
-   destroy() {
+  destroy() {
     super.destroy();
-    this.body.removeEventListener('collide',  this.onCollide.bind(this));
+    this.body.removeEventListener("collide", this.onCollide.bind(this));
   }
 
   getState(): MissileState {

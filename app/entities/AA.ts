@@ -1,9 +1,6 @@
 import Entity, { EntityEvents, EntityState } from "./Entity";
 import * as CANNON from "cannon-es";
-import Missile, {
-  MissileProps,
-  MissileState,
-} from "./Missile";
+import Missile, { MissileProps, MissileState } from "./Missile";
 import { World } from "./World";
 import TargetNPC from "./TargetNPC";
 
@@ -16,7 +13,7 @@ export interface AAProps {
   };
   reloadTime: number;
   missileCount: number;
-  missileProps: Omit<MissileProps, "id" | "startPosition">;
+  missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
 }
 
 export interface AAState extends EntityState {
@@ -31,13 +28,15 @@ export interface AAState extends EntityState {
 export interface AAEvents extends EntityEvents {
   destroy: EntityState;
   launch_missile: MissileState;
+  missile_overloaded: MissileState;
+  missile_over_distance: MissileState;
   target_captured: AAState;
   target_resetted: AAState;
 }
 
 export class AA extends Entity<AAEvents> {
   private radarProps: AAProps["radarProps"];
-  private missileProps: Omit<MissileProps, "id" | "startPosition">;
+  private missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
   private missileCount: number;
   private launched: Missile[] = [];
   private aimRay = new CANNON.Vec3(1, 1, 1);
@@ -71,13 +70,13 @@ export class AA extends Entity<AAEvents> {
   update(deltaTime: number) {
     super.update(deltaTime);
     this.launched.forEach((missile) => {
-      missile.aimRay = this.aimRay;
       missile.update(deltaTime);
     });
     this.updateRadar();
   }
 
   fire() {
+    if (!this.capturedTargetId) return;
     const now = Date.now();
     if (now - this.lastTimeFired < this.reloadTime * 1000) return;
     if (!this.body.world || this.missileCount <= 0) return;
@@ -89,6 +88,7 @@ export class AA extends Entity<AAEvents> {
           y: this.body.position.y,
           z: this.body.position.z,
         },
+        targetId: this.capturedTargetId,
         ...this.missileProps,
       },
       this.gameWorld
@@ -98,6 +98,14 @@ export class AA extends Entity<AAEvents> {
       this.launched = this.launched.filter(
         (missile) => missile.id !== missile.id
       );
+    });
+
+    missile.eventEmitter.on("overloaded", (state) => {
+      this.eventEmitter.emit("missile_overloaded", state);
+    });
+
+    missile.eventEmitter.on("over_distance", (state) => {
+      this.eventEmitter.emit("missile_over_distance", state);
     });
 
     this.eventEmitter.emit("launch_missile", missile.getState());
@@ -116,35 +124,35 @@ export class AA extends Entity<AAEvents> {
 
     // Проверяем каждую обнаруженную цель
     for (const targetId of this.detectedTargetIds) {
-        const target = this.gameWorld.getEntityById(targetId) as TargetNPC;
-        if (!target) continue;
+      const target = this.gameWorld.getEntityById(targetId) as TargetNPC;
+      if (!target) continue;
 
-        // Вектор от зенитки к цели
-        const directionToTarget = target.body.position.vsub(aaPosition)
-        directionToTarget.normalize();
+      // Вектор от зенитки к цели
+      const directionToTarget = target.body.position.vsub(aaPosition);
+      directionToTarget.normalize();
 
-        // Угол между aimRay и вектором на цель
-        const aimRayNormalized = this.aimRay.clone();
-        const angleToTarget = Math.acos(directionToTarget.dot(aimRayNormalized));
+      // Угол между aimRay и вектором на цель
+      const aimRayNormalized = this.aimRay.clone();
+      const angleToTarget = Math.acos(directionToTarget.dot(aimRayNormalized));
 
-        // Если цель находится в секторе захвата (менее половины captureAngle)
-        if (angleToTarget <= halfCaptureAngle) {
-            // Захватываем цель
-            this.capturedTargetId = target.id;
-            console.log(`Target captured: ${target.id}`);
-            this.eventEmitter.emit('target_captured', this.getState());
-            break; // Захватываем первую подходящую цель
-        }
+      // Если цель находится в секторе захвата (менее половины captureAngle)
+      if (angleToTarget <= halfCaptureAngle) {
+        // Захватываем цель
+        this.capturedTargetId = target.id;
+        console.log(`Target captured: ${target.id}`);
+        this.eventEmitter.emit("target_captured", this.getState());
+        break; // Захватываем первую подходящую цель
+      }
     }
   }
 
   resetTarget() {
     this.capturedTargetId = null;
-    this.eventEmitter.emit('target_resetted', this.getState());
+    this.eventEmitter.emit("target_resetted", this.getState());
   }
 
   updateAimRay(aimRay: [number, number, number]) {
-    this.aimRay = new CANNON.Vec3(aimRay[0], aimRay[1], aimRay[2])
+    this.aimRay = new CANNON.Vec3(aimRay[0], aimRay[1], aimRay[2]);
     this.aimRay.normalize();
   }
 
@@ -172,8 +180,11 @@ export class AA extends Entity<AAEvents> {
       }
     });
 
-    if (this.capturedTargetId && !this.detectedTargetIds.includes(this.capturedTargetId)) {
-      this.resetTarget()
+    if (
+      this.capturedTargetId &&
+      !this.detectedTargetIds.includes(this.capturedTargetId)
+    ) {
+      this.resetTarget();
     }
   }
 
