@@ -4,6 +4,7 @@ import Missile, { MissileProps, MissileState } from "./Missile";
 import { World } from "./World";
 import TargetNPC from "./TargetNPC";
 
+type AAMissileProps = Omit<MissileProps, "id" | "startPosition" | "targetId" | "guidanceMethod">;
 export interface AAProps {
   id: string;
   position: { x: number; y: number; z: number };
@@ -14,7 +15,7 @@ export interface AAProps {
   reloadTime: number;
   missileCount: number;
   missileChannelCount: number;
-  missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
+  missileProps: AAMissileProps;
 }
 
 export interface AAState extends EntityState {
@@ -37,7 +38,7 @@ export interface AAEvents extends EntityEvents {
 
 export class AA extends Entity<AAEvents> {
   private radarProps: AAProps["radarProps"];
-  private missileProps: Omit<MissileProps, "id" | "startPosition" | "targetId">;
+  private missileProps: AAMissileProps;
   private missileCount: number;
   private missileChannelCount: number;
   private launched: Missile[] = [];
@@ -78,7 +79,7 @@ export class AA extends Entity<AAEvents> {
     this.updateRadar();
   }
 
-  fire() {
+  fire(guidanceMethod: 'default' | '3p' | '1/2') {
     if (!this.capturedTargetId || this.missileCount <= 0) return;
     const now = Date.now();
     if (now - this.lastTimeFired < this.reloadTime * 1000) return;
@@ -92,6 +93,7 @@ export class AA extends Entity<AAEvents> {
           z: this.body.position.z,
         },
         targetId: this.capturedTargetId,
+        guidanceMethod,
         ...this.missileProps,
       },
       this.gameWorld

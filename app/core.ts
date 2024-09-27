@@ -9,7 +9,7 @@ import TargetNPC, {
 import TypedEmitter from "./utils/TypedEmitter";
 import { EntityState } from "./entities/Entity";
 import { AA, AAState, type AAProps } from "./entities/AA";
-import { MissileState } from "./entities/Missile";
+import { MissileGuidanceMethod, MissileState } from "./entities/Missile";
 
 // Константа для частоты обновления (40 раз в секунду)
 const UPDATE_FREQUENCY = 1 / 40;
@@ -110,9 +110,9 @@ export class Core {
     aa?.updateAimRay(aimRay);
   }
 
-  fireAA(aaId: string) {
+  fireAA(aaId: string, guidanceMethod: MissileGuidanceMethod) {
     const aa = this.gameWorld.getEntityById(aaId) as AA;
-    aa?.fire();
+    aa?.fire(guidanceMethod);
   }
 
   captureTarget(aaId: string) {

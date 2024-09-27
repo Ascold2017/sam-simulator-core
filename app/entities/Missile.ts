@@ -4,6 +4,8 @@ import FlightObject, {
   FlightObjectState,
 } from "./FlightObject";
 import { World } from "./World";
+
+export type MissileGuidanceMethod = "default" | "3p" | "1/2";
 export interface MissileProps {
   id: string;
   startPosition: { x: number; y: number; z: number };
@@ -13,10 +15,13 @@ export interface MissileProps {
   killRadius: number;
   maxOverload: number;
   targetId: string;
+  guidanceMethod: MissileGuidanceMethod;
 }
 
 export interface MissileState extends FlightObjectState {
   exploded: boolean;
+  guidanceMethod: MissileGuidanceMethod;
+  isActiveRange: boolean;
 }
 
 export interface MissileEvents extends FlightObjectEvents {
@@ -38,9 +43,12 @@ export default class Missile extends FlightObject<MissileEvents> {
   private distanceTraveled: number = 0;
   private exploded: boolean = false;
   private fuseEnabled: boolean = false;
+  private isActiveRange: boolean = true;
   private startPosition: CANNON.Vec3;
   private gameWorld: World;
   private targetId: string;
+  private guidanceMethod: MissileGuidanceMethod;
+  private accelearation = 1;
 
   constructor(props: MissileProps, gameWorld: World) {
     const body = new CANNON.Body({
@@ -66,6 +74,7 @@ export default class Missile extends FlightObject<MissileEvents> {
     this.maxOverload = props.maxOverload;
     this.killRadius = props.killRadius;
     this.type = "missile";
+    this.guidanceMethod = props.guidanceMethod;
 
     this.startPosition = new CANNON.Vec3(
       props.startPosition.x,
@@ -116,7 +125,8 @@ export default class Missile extends FlightObject<MissileEvents> {
 
     /// После активного участка ракета замедляется
     if (this.distanceTraveled >= this.activeRange) {
-      this.body.velocity.scale(0.98); // Уменьшаем скорость
+      this.isActiveRange = false;
+      this.accelearation *= 0.9999;
     }
 
     this.adjustTrajectory(target);
@@ -126,7 +136,7 @@ export default class Missile extends FlightObject<MissileEvents> {
   private adjustTrajectory(target: FlightObject) {
     const directionToTarget = target.body.position.vsub(this.body.position);
     directionToTarget.normalize();
-    this.velocity = directionToTarget.scale(this.maxVelocity);
+    this.velocity = directionToTarget.scale(this.maxVelocity * this.accelearation);
   }
 
   private onCollide(event: any) {
@@ -163,6 +173,8 @@ export default class Missile extends FlightObject<MissileEvents> {
     return {
       ...super.getState(),
       exploded: this.exploded,
+      guidanceMethod: this.guidanceMethod,
+      isActiveRange: this.isActiveRange,
     };
   }
 }
