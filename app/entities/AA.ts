@@ -22,6 +22,7 @@ export interface AAState extends EntityState {
   ammoCount: number;
   readyToFire: boolean;
   aimRay: [number, number, number];
+  captureAngle: number;
   capturedTargetId: string | null;
   launchedMissileIds: string[];
   detectedTargetIds: string[];
@@ -205,6 +206,7 @@ export class AA extends Entity<AAEvents> {
       launchedMissileIds: this.launched.map((missile) => missile.id),
       detectedTargetIds: this.detectedTargetIds,
       capturedTargetId: this.capturedTargetId,
+      captureAngle: this.radarProps.captureAngle
     };
   }
 }
