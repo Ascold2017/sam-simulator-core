@@ -104,7 +104,7 @@ export class AA extends Entity<AAEvents> {
       this.launched = this.launched.filter(
         (missile) => missile.id !== missile.id
       );
-      this.missileCount++;
+      this.missileChannelCount++;
     });
 
     missile.eventEmitter.on("overloaded", (state) => {
