@@ -7,6 +7,8 @@ import TargetNPC from "./TargetNPC";
 type AAMissileProps = Omit<MissileProps, "id" | "startPosition" | "targetId" | "guidanceMethod">;
 export interface AAProps {
   id: string;
+  userId: number;
+  username: string;
   position: { x: number; y: number; z: number };
   radarProps: {
     range: number;
@@ -19,6 +21,8 @@ export interface AAProps {
 }
 
 export interface AAState extends EntityState {
+  userId: number;
+  username: string;
   ammoCount: number;
   readyToFire: boolean;
   aimRay: [number, number, number];
@@ -38,6 +42,8 @@ export interface AAEvents extends EntityEvents {
 }
 
 export class AA extends Entity<AAEvents> {
+  private userId: number;
+  private username: string;
   private radarProps: AAProps["radarProps"];
   private missileProps: AAMissileProps;
   private missileCount: number;
@@ -63,6 +69,8 @@ export class AA extends Entity<AAEvents> {
 
     super(props.id, body);
 
+    this.userId = props.userId;
+    this.username = props.username;
     this.radarProps = props.radarProps;
     this.missileProps = props.missileProps;
     this.missileCount = props.missileCount;
@@ -200,6 +208,8 @@ export class AA extends Entity<AAEvents> {
   getState(): AAState {
     return {
       ...super.getState(),
+      userId: this.userId,
+      username: this.username,
       ammoCount: this.missileCount,
       aimRay: this.aimRay.toArray(),
       readyToFire: Date.now() - this.lastTimeFired > this.reloadTime * 1000,
