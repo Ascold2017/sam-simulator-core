@@ -101,6 +101,11 @@ class FlightObject<
     }
   }
 
+  destroy(): void {
+    super.destroy();
+    this.velocity = new CANNON.Vec3(0, 0, 0);
+  }
+
   getState(): FlightObjectState {
     return {
       ...super.getState(),
