@@ -143,9 +143,9 @@ export default class Missile extends FlightObject<MissileEvents> {
   }
 
   private onCollide(event: any) {
-    super.onCollide(event);
     if (!this.fuseEnabled) return;
-
+    super.onCollide(event);
+    
     const targetBody = event.body;
 
     // Проверяем, если столкновение произошло с объектом типа FlightObject
