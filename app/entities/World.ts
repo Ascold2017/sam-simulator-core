@@ -24,8 +24,9 @@ export class World {
 
   updateWorld(deltaTime: number) {
     this.cannonWorld.step(deltaTime);
-    for (const entity of this.entities.filter(e => !e.isDestroyed)) {
-      entity.update(deltaTime);
+    for (const entity of this.entities) {
+      if (!entity.isDestroyed) entity.update(deltaTime);
+      if (entity.isShouldRemove) this.removeEntity(entity.id);
     }
   }
 
@@ -35,6 +36,7 @@ export class World {
   }
 
   removeEntity(entityId: string) {
+    console.log(`Removing entity ${entityId}`);
     const entity = this.entities.find((entity) => entity.id === entityId);
     if (entity) {
       this.cannonWorld.removeBody(entity.body);

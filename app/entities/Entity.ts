@@ -18,6 +18,7 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
   id: string;
   body: CANNON.Body;
   isDestroyed: boolean;
+  isShouldRemove: boolean = false;
   type: string;
   entityId: number | null;
   readonly eventEmitter = new TypedEmitter<TEvents>();
@@ -48,6 +49,10 @@ class Entity<TEvents extends EntityEvents = EntityEvents> {
     console.log("Entity destroyed:", this.id);
     const state = this.getState();
     this.eventEmitter.emit("destroy", state);
+    const t = setTimeout(() => {
+      this.isShouldRemove = true;
+      clearTimeout(t);
+    }, 6000);
   }
 
   getState(): EntityState {
