@@ -82,7 +82,6 @@ export default class Missile extends FlightObject<MissileEvents> {
       props.startPosition.z
     );
     this.gameWorld = gameWorld;
-    this.body.addEventListener("collide", this.onCollide.bind(this));
   }
 
   update(deltaTime: number) {
@@ -162,11 +161,6 @@ export default class Missile extends FlightObject<MissileEvents> {
     this.exploded = true;
     this.eventEmitter.emit("explode", this.getState());
     this.destroy(); // Вызов destroy для удаления ракеты
-  }
-
-  destroy() {
-    super.destroy();
-    this.body.removeEventListener("collide", this.onCollide.bind(this));
   }
 
   getState(): MissileState {
