@@ -24,7 +24,7 @@ export class World {
 
   updateWorld(deltaTime: number) {
     this.cannonWorld.step(deltaTime);
-    for (const entity of this.entities) {
+    for (const entity of this.entities.filter(e => !e.isDestroyed)) {
       entity.update(deltaTime);
     }
   }

@@ -52,8 +52,12 @@ export default class Missile extends FlightObject<MissileEvents> {
 
   constructor(props: MissileProps, gameWorld: World) {
     const body = new CANNON.Body({
-      mass: 100,
+      mass: 0,
       shape: new CANNON.Sphere(props.killRadius),
+      material: new CANNON.Material({
+        restitution: 0,
+        friction: 1,
+      }),
       position: new CANNON.Vec3(
         props.startPosition.x,
         props.startPosition.y,

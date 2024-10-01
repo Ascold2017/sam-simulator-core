@@ -53,6 +53,10 @@ class FlightObject<
     } else {
       this.body.velocity = this.velocity;
     }
+
+    if (this.body.position.y <= 0) {
+      this.destroy();
+    }
     this.updateRotationAccordingToVelocity();
   }
 
