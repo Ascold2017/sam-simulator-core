@@ -40,8 +40,7 @@ class FlightObject<
     // Вычисляем ускорение: (текущая скорость - предыдущая скорость) / deltaTime
     const currentVelocity = this.velocity.clone();
     const acceleration = currentVelocity.vsub(this.previousVelocity);
-
-    this.overload = acceleration.scale(1/deltaTime).length() / 9.81;
+    this.overload = acceleration.length() / 9.81;
 
     // Сохраняем текущую скорость как предыдущую для следующего кадра
     this.previousVelocity.copy(currentVelocity);
